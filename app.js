@@ -336,6 +336,10 @@ function askQuestion(question) {
   submitCustomQuery();
 }
 
+function askPresetQuestion(key) {
+  askQuestion(text(key));
+}
+
 async function submitCustomQuery() {
   const question = document.getElementById("queryInput").value.trim();
   if (!question) return;
