@@ -1,0 +1,5 @@
+timestamp,zone_id,gas_level,temperature,visibility
+2026-09-19T15:00:00,Zone B,4.2,22,80
+2026-09-19T15:15:00,Zone B,7.5,25,45
+2026-09-19T15:27:00,Zone B,12.8,29,18
+2026-09-19T15:20:00,Zone C,invalid,31,35

@@ -227,7 +227,7 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
             for expected_column in sorted(schema["columns"] - {"timestamp", "zone_id"}):
                 if expected_column not in values:
                     values[expected_column] = None
-                if values[expected_column] is None and expected_column not in schema["identity"]:
+                if row.get(expected_column) is None and expected_column not in schema["identity"]:
                     validation_issues.append(f"Missing {expected_column}.")
 
             entity_field = ENTITY_ID_FIELDS.get(file_type)

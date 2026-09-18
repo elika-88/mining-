@@ -112,6 +112,7 @@ def test_invalid_numeric_is_null_but_record_remains_valid() -> None:
     assert summary["valid_records"] == 1
     assert summary["rejected_records"] == 0
     assert any("Invalid numeric value for speed" in warning for warning in summary["warnings"])
+    assert not any("Missing speed" in warning for warning in summary["warnings"])
 
 
 def test_missing_columns_are_reported_and_partial_row_is_retained() -> None:

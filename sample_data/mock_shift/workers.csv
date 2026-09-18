@@ -1,0 +1,11 @@
+worker_id,timestamp,zone_id,status
+W-001,2026-09-19T14:50:00,Zone A,active
+W-001,2026-09-19T15:25:00,Zone B,active
+W-002,2026-09-19T15:05:00,Zone B,active
+W-003,2026-09-19T15:10:00,Zone C,off_shift
+W-004,2026-09-19T15:20:00,,active
+W-005,not-a-timestamp,Zone A,active
+,2026-09-19T15:22:00,Zone A,active
+W-006,2026-09-19T14:55:00,Zone D,active
+W-007,2026-09-19T15:15:00,Zone C,active
+W-007,2026-09-19T15:28:00,Zone C,inactive

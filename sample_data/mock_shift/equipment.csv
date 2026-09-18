@@ -1,0 +1,7 @@
+equipment_id,equipment_type,timestamp,zone_id,status,speed
+T-01,haul_truck,2026-09-19T15:26:00,Zone B,active,27
+L-02,loader,2026-09-19T14:45:00,Zone A,active,8
+L-02,loader,2026-09-19T15:22:00,Zone A,maintenance,0
+D-03,drill,2026-09-19T15:18:00,Zone C,active,not-a-number
+V-04,service_vehicle,2026-09-19T15:29:00,Zone D,active,12
+T-01,haul_truck,2026-09-19T15:26:00,Zone B,active,27
