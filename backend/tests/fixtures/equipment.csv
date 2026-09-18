@@ -1,0 +1,4 @@
+equipment_id,equipment_type,timestamp,zone_id,status,speed
+T-04,truck,2026-09-19T15:24:00,Zone B,active,27
+L-02,loader,2026-09-19T15:18:00,Zone A,active,8
+

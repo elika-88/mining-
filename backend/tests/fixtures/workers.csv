@@ -1,0 +1,4 @@
+worker_id,timestamp,zone_id,status
+W-17,2026-09-19T15:21:00,Zone B,active
+W-08,2026-09-19T15:12:00,Zone A,active
+

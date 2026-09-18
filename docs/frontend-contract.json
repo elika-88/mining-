@@ -16,7 +16,45 @@
       "warnings": [
         "26 malformed records were isolated and excluded from analysis."
       ]
-    }
+    },
+    "files": [
+      {
+        "file_type": "workers",
+        "source_file": "workers.csv",
+        "received_records": 42,
+        "valid_records": 42,
+        "rejected_records": 0,
+        "warnings": []
+      },
+      {
+        "file_type": "equipment",
+        "source_file": "equipment.csv",
+        "received_records": 18,
+        "valid_records": 18,
+        "rejected_records": 0,
+        "warnings": []
+      },
+      {
+        "file_type": "environment",
+        "source_file": "environment.csv",
+        "received_records": 928,
+        "valid_records": 904,
+        "rejected_records": 24,
+        "warnings": [
+          "24 malformed records were isolated."
+        ]
+      },
+      {
+        "file_type": "events",
+        "source_file": "events.csv",
+        "received_records": 12,
+        "valid_records": 10,
+        "rejected_records": 2,
+        "warnings": [
+          "2 malformed records were isolated."
+        ]
+      }
+    ]
   },
   "risks": [
     {

@@ -3,15 +3,6 @@ from typing import Annotated
 from fastapi import FastAPI, File, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.mock_data import (
-    ANALYSIS_ID,
-    DEMO_ANALYSIS,
-    DEMO_OVERVIEW,
-    DEMO_RISK,
-    TRUCK_EVIDENCE,
-    WORKER_EVIDENCE,
-    build_demo_answer,
-)
 from app.models.responses import (
     AnalysisResponse,
     Evidence,
@@ -20,13 +11,16 @@ from app.models.responses import (
     QuestionRequest,
     Risk,
 )
+from app.services.analysis import build_analysis
+from app.services.ingestion import ingest_files
+from app.store.memory import StoredAnalysis, analysis_store
 
 app = FastAPI(
     title="Mine Safety Incident Prevention API",
-    version="0.1.0",
+    version="0.2.0",
     description=(
-        "Contract-first prototype API. Current responses are explicitly marked demo data; "
-        "CSV ingestion and deterministic analysis are implemented in the next phase."
+        "Mine-shift CSV ingestion API with row-level validation and evidence provenance. "
+        "Deterministic risk detection is implemented in the next phase."
     ),
 )
 
@@ -39,9 +33,11 @@ app.add_middleware(
 )
 
 
-def require_demo_analysis(analysis_id: str) -> None:
-    if analysis_id != ANALYSIS_ID:
+def require_analysis(analysis_id: str) -> StoredAnalysis:
+    analysis = analysis_store.get(analysis_id)
+    if analysis is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
+    return analysis
 
 
 @app.get("/api/health", tags=["system"])
@@ -62,9 +58,18 @@ async def create_analysis(
     environment: Annotated[UploadFile | None, File()] = None,
     events: Annotated[UploadFile | None, File()] = None,
 ) -> AnalysisResponse:
-    # Phase-one contract endpoint. Files are accepted so frontend integration can begin.
-    _ = workers, equipment, environment, events
-    return DEMO_ANALYSIS
+    uploads = {
+        "workers": workers,
+        "equipment": equipment,
+        "environment": environment,
+        "events": events,
+    }
+    if not any(uploads.values()):
+        raise HTTPException(status_code=422, detail="At least one CSV file must be provided.")
+    ingestion = await ingest_files(uploads)
+    response, records = build_analysis(ingestion)
+    analysis_store.save(response, records)
+    return response
 
 
 @app.get(
@@ -73,8 +78,7 @@ async def create_analysis(
     tags=["analysis"],
 )
 def get_overview(analysis_id: str) -> Overview:
-    require_demo_analysis(analysis_id)
-    return DEMO_OVERVIEW
+    return require_analysis(analysis_id).response.overview
 
 
 @app.get(
@@ -83,8 +87,7 @@ def get_overview(analysis_id: str) -> Overview:
     tags=["risks"],
 )
 def list_risks(analysis_id: str) -> list[Risk]:
-    require_demo_analysis(analysis_id)
-    return [DEMO_RISK]
+    return require_analysis(analysis_id).response.risks
 
 
 @app.get(
@@ -93,10 +96,11 @@ def list_risks(analysis_id: str) -> list[Risk]:
     tags=["risks"],
 )
 def get_risk(analysis_id: str, risk_id: str) -> Risk:
-    require_demo_analysis(analysis_id)
-    if risk_id != DEMO_RISK.risk_id:
+    analysis = require_analysis(analysis_id)
+    risk = next((risk for risk in analysis.response.risks if risk.risk_id == risk_id), None)
+    if risk is None:
         raise HTTPException(status_code=404, detail="Risk not found")
-    return DEMO_RISK
+    return risk
 
 
 @app.get(
@@ -105,12 +109,8 @@ def get_risk(analysis_id: str, risk_id: str) -> Risk:
     tags=["evidence"],
 )
 def get_evidence(analysis_id: str, evidence_id: str) -> Evidence:
-    require_demo_analysis(analysis_id)
-    evidence_by_id = {
-        WORKER_EVIDENCE.evidence_id: WORKER_EVIDENCE,
-        TRUCK_EVIDENCE.evidence_id: TRUCK_EVIDENCE,
-    }
-    evidence = evidence_by_id.get(evidence_id)
+    analysis = require_analysis(analysis_id)
+    evidence = analysis.evidence.get(evidence_id)
     if evidence is None:
         raise HTTPException(status_code=404, detail="Evidence not found")
     return evidence
@@ -122,6 +122,19 @@ def get_evidence(analysis_id: str, evidence_id: str) -> Evidence:
     tags=["assistant"],
 )
 def ask_question(analysis_id: str, request: QuestionRequest) -> QuestionAnswer:
-    require_demo_analysis(analysis_id)
-    return build_demo_answer(request.question)
-
+    require_analysis(analysis_id)
+    return QuestionAnswer(
+        question=request.question,
+        answer=(
+            "The uploaded CSV files were processed successfully, but risk detection and "
+            "grounded natural-language analysis are not enabled in this ingestion phase."
+        ),
+        answer_mode="ingestion_only",
+        observed_facts=[],
+        interpretation=None,
+        recommended_action=None,
+        limitations=[
+            "No safety conclusion was generated from the uploaded records.",
+            "Use the overview and file warnings to inspect data quality.",
+        ],
+    )

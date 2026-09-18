@@ -4,13 +4,12 @@ Backend prototype for the HACK ALEM AI 2026 Extractive Industry challenge.
 
 ## Frontend handoff
 
-The backend contract is ready for frontend development. Until real CSV processing is added,
-the API returns clearly documented mock data.
+The backend contract and real CSV ingestion pipeline are ready for frontend development.
+The committed JSON file remains a stable UI fixture; uploaded files are processed dynamically.
 
 - Swagger UI after starting the backend: `http://127.0.0.1:8000/docs`
 - OpenAPI JSON after starting the backend: `http://127.0.0.1:8000/openapi.json`
 - Frontend mock payload: [`docs/frontend-contract.json`](docs/frontend-contract.json)
-- Demo analysis ID: `demo-analysis-001`
 - Backend instructions: [`backend/README.md`](backend/README.md)
 
 GitHub hosts the source code but does not run this API. Start the backend locally before using
@@ -45,3 +44,6 @@ uvicorn app.main:app --reload
 - Risk scores are constrained to `0–100`.
 - Priority is one of `CRITICAL`, `HIGH`, `MEDIUM`, or `LOW`.
 - Unknown analysis, risk, and evidence IDs return `404`.
+- The dataset's latest valid timestamp is treated as the current shift time.
+- Active workers and equipment use their latest record within the final 30 minutes of the dataset.
+- Risk detection is the next implementation phase, so uploaded analyses currently return an empty risk list.

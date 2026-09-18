@@ -66,6 +66,15 @@ class ProcessingSummary(ApiModel):
     warnings: list[str]
 
 
+class FileProcessingSummary(ApiModel):
+    file_type: str
+    source_file: str | None
+    received_records: int = Field(ge=0)
+    valid_records: int = Field(ge=0)
+    rejected_records: int = Field(ge=0)
+    warnings: list[str]
+
+
 class Overview(ApiModel):
     analysis_id: str
     status: str
@@ -76,6 +85,7 @@ class Overview(ApiModel):
     shift_events: int = Field(ge=0)
     high_priority_risks: int = Field(ge=0)
     processing_summary: ProcessingSummary
+    files: list[FileProcessingSummary] = Field(default_factory=list)
 
 
 class GroundedFact(ApiModel):
@@ -101,4 +111,3 @@ class AnalysisResponse(ApiModel):
 
 class QuestionRequest(ApiModel):
     question: str = Field(min_length=1, max_length=1000)
-
