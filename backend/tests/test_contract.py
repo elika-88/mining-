@@ -54,6 +54,20 @@ def test_requires_at_least_one_file() -> None:
     assert response.json()["detail"] == "At least one CSV file must be provided."
 
 
+def test_frontend_local_origins_are_allowed_by_cors() -> None:
+    for origin in ("http://localhost:5173", "http://127.0.0.1:5173"):
+        response = client.options(
+            "/api/analyses",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == origin
+
+
 def test_valid_files_create_real_overview() -> None:
     payload = create_valid_analysis()
     overview = payload["overview"]

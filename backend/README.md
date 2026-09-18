@@ -70,6 +70,8 @@ uses `deterministic_fallback`. No API key is required for the fallback.
 
 Values can be placed in `backend/.env`; the application loads this file at startup. The read-only
 `GET /api/config/ai` endpoint reports whether routing is configured and never returns the key.
+`CORS_ALLOW_ORIGINS` can override the comma-separated frontend origins; both `localhost:5173`
+and `127.0.0.1:5173` are enabled by default for the included frontend.
 
 The Responses API structured-output implementation follows the official OpenAI documentation:
 
