@@ -16,7 +16,13 @@ const translations = {
     noRisksMatch: "No risks match the selected filters.", selectFilesError: "Select at least one supported CSV file.",
     unknownFileError: "Unsupported file name: {name}", requestError: "The backend request failed: {message}",
     questionNeedsAnalysis: "Run an analysis before asking a question.", insufficientEvidence: "No observed evidence was returned for this risk.",
-    limitations: "Limitations", row: "row"
+    limitations: "Limitations", row: "row", datasetTitle: "Dataset readiness", shiftStart: "Shift start", shiftEnd: "Shift end",
+    missingFiles: "Missing: {files}", allFilesReady: "All standard files selected", apiChecking: "Checking API", apiConnected: "API connected",
+    apiUnavailable: "API unavailable", dataQuality: "Data quality", qualityWaiting: "Available after analysis", rejectedRecords: "{count} rejected",
+    qualitySummary: "{valid} valid of {received} received · {rejected} rejected", exportReport: "Export report",
+    languageNotice: "Interface labels are translated. Backend risk and answer text is shown in the language returned by the API.",
+    score: "Score", clearEntityFilter: "Clear entity filter", filteringEntity: "Related to {entity}", evidenceUnavailable: "Evidence details unavailable",
+    asking: "Asking...", selected: "Selected"
   },
   kk: {
     appTitle: "MineShift қауіпсіздік басқару панелі", awaitingShift: "Ауысым деректері күтілуде", filesReady: "{count} файл дайын",
@@ -35,7 +41,13 @@ const translations = {
     noRisksMatch: "Таңдалған сүзгілерге сәйкес қауіп жоқ.", selectFilesError: "Кемінде бір қолдау көрсетілетін CSV файлын таңдаңыз.",
     unknownFileError: "Қолдау көрсетілмейтін файл атауы: {name}", requestError: "Сервер сұрауы орындалмады: {message}",
     questionNeedsAnalysis: "Сұрақ қоймас бұрын талдауды іске қосыңыз.", insufficientEvidence: "Бұл қауіп үшін бақылау дәлелі қайтарылмады.",
-    limitations: "Шектеулер", row: "жол"
+    limitations: "Шектеулер", row: "жол", datasetTitle: "Деректер жиынтығының дайындығы", shiftStart: "Ауысым басталуы", shiftEnd: "Ауысым аяқталуы",
+    missingFiles: "Жетпейді: {files}", allFilesReady: "Барлық стандартты файл таңдалды", apiChecking: "API тексерілуде", apiConnected: "API қосылды",
+    apiUnavailable: "API қолжетімсіз", dataQuality: "Деректер сапасы", qualityWaiting: "Талдаудан кейін қолжетімді", rejectedRecords: "{count} жазба қабылданбады",
+    qualitySummary: "Қабылданғаны {received}, жарамдысы {valid}, қабылданбағаны {rejected}", exportReport: "Есепті экспорттау",
+    languageNotice: "Интерфейс аударылады. Қауіп пен жауап мәтіні API қайтарған тілде көрсетіледі.",
+    score: "Ұпай", clearEntityFilter: "Нысан сүзгісін тазалау", filteringEntity: "{entity} бойынша", evidenceUnavailable: "Дәлел деректері қолжетімсіз",
+    asking: "Сұрау жіберілуде...", selected: "Таңдалды"
   },
   ru: {
     appTitle: "MineShift — консоль безопасности", awaitingShift: "Ожидание данных смены", filesReady: "Файлов готово: {count}",
@@ -54,7 +66,13 @@ const translations = {
     noRisksMatch: "Нет рисков по выбранным фильтрам.", selectFilesError: "Выберите хотя бы один поддерживаемый CSV-файл.",
     unknownFileError: "Неподдерживаемое имя файла: {name}", requestError: "Ошибка запроса к серверу: {message}",
     questionNeedsAnalysis: "Сначала запустите анализ.", insufficientEvidence: "Для этого риска не возвращены наблюдаемые данные.",
-    limitations: "Ограничения", row: "строка"
+    limitations: "Ограничения", row: "строка", datasetTitle: "Готовность набора данных", shiftStart: "Начало смены", shiftEnd: "Конец смены",
+    missingFiles: "Не хватает: {files}", allFilesReady: "Все стандартные файлы выбраны", apiChecking: "Проверка API", apiConnected: "API подключён",
+    apiUnavailable: "API недоступен", dataQuality: "Качество данных", qualityWaiting: "Доступно после анализа", rejectedRecords: "Отклонено: {count}",
+    qualitySummary: "Получено {received}, корректно {valid}, отклонено {rejected}", exportReport: "Экспортировать отчёт",
+    languageNotice: "Интерфейс переведён. Тексты рисков и ответов показываются на языке, возвращённом API.",
+    score: "Оценка", clearEntityFilter: "Сбросить фильтр объекта", filteringEntity: "Связано с {entity}", evidenceUnavailable: "Детали доказательства недоступны",
+    asking: "Отправка вопроса...", selected: "Выбрано"
   },
   zh: {
     appTitle: "MineShift 矿山安全调度控制台", awaitingShift: "等待导入班次数据", filesReady: "已选择 {count} 个文件",
@@ -73,7 +91,13 @@ const translations = {
     noRisksMatch: "当前筛选条件下没有风险。", selectFilesError: "请至少选择一个受支持的 CSV 文件。",
     unknownFileError: "不支持的文件名：{name}", requestError: "后端请求失败：{message}",
     questionNeedsAnalysis: "请先执行一次分析。", insufficientEvidence: "该风险没有返回原始观测证据。",
-    limitations: "数据限制", row: "行"
+    limitations: "数据限制", row: "行", datasetTitle: "数据集准备情况", shiftStart: "班次开始", shiftEnd: "班次结束",
+    missingFiles: "缺少：{files}", allFilesReady: "四个标准文件已全部选择", apiChecking: "正在检查 API", apiConnected: "API 已连接",
+    apiUnavailable: "API 不可用", dataQuality: "数据质量", qualityWaiting: "分析后显示", rejectedRecords: "拒绝 {count} 条记录",
+    qualitySummary: "接收 {received} 条，有效 {valid} 条，拒绝 {rejected} 条", exportReport: "导出风险报告",
+    languageNotice: "界面标签支持翻译；风险标题、解释和建议保持后端 API 返回的语言。",
+    score: "评分", clearEntityFilter: "清除实体筛选", filteringEntity: "仅显示与 {entity} 相关", evidenceUnavailable: "无法获取证据详情",
+    asking: "正在提问...", selected: "已选择"
   }
 };
 
@@ -85,6 +109,8 @@ let currentAnalysis = null;
 let selectedRiskId = null;
 let priorityFilter = "all";
 let zoneFilter = "all";
+let entityFilter = null;
+let apiConnected = null;
 
 function text(key, values = {}) {
   let value = translations[currentLanguage][key] || translations.en[key] || key;
@@ -98,6 +124,33 @@ function apiUrl(path) {
   return `${apiBase.replace(/\/$/, "")}${path}`;
 }
 
+async function checkApiStatus() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch(apiUrl("/api/health"), { signal: controller.signal });
+    apiConnected = response.ok;
+  } catch {
+    apiConnected = false;
+  } finally {
+    clearTimeout(timeout);
+    updateApiStatus();
+  }
+}
+
+function updateApiStatus() {
+  const status = document.getElementById("apiStatus");
+  if (apiConnected === null) {
+    status.textContent = text("apiChecking");
+    status.className = "min-w-[112px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-subtext border border-line";
+    return;
+  }
+  status.textContent = apiConnected ? text("apiConnected") : text("apiUnavailable");
+  status.className = apiConnected
+    ? "min-w-[112px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100"
+    : "min-w-[112px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100";
+}
+
 function changeLanguage(language) {
   const scrollPosition = window.scrollY;
   currentLanguage = language;
@@ -109,6 +162,8 @@ function changeLanguage(language) {
   });
   document.getElementById("queryInput").placeholder = text("inputPlaceholder");
   updateShiftIndicator();
+  updateApiStatus();
+  renderFileStatus();
   renderAnalysis();
   requestAnimationFrame(() => window.scrollTo(0, scrollPosition));
 }
@@ -127,7 +182,9 @@ function updateShiftIndicator() {
 function showMessage(message, sources = "") {
   document.getElementById("answerQuestion").textContent = text("appTitle");
   document.getElementById("answerContent").textContent = message;
-  document.getElementById("answerSources").textContent = sources || "—";
+  const evidenceList = document.getElementById("answerEvidenceList");
+  evidenceList.replaceChildren();
+  if (sources) renderAnswerEvidenceEmpty(evidenceList, sources);
   document.getElementById("answerBox").classList.remove("hidden");
 }
 
@@ -143,6 +200,33 @@ function handleFilesUpload(event) {
   }
   selectedFiles = nextFiles;
   updateShiftIndicator();
+  renderFileStatus();
+}
+
+function renderFileStatus() {
+  const list = document.getElementById("selectedFileList");
+  const missing = [...supportedFiles].filter((fileName) => !selectedFiles.has(fileName.replace(".csv", "")));
+  list.replaceChildren();
+  [...supportedFiles].forEach((fileName) => {
+    const selected = selectedFiles.get(fileName.replace(".csv", ""));
+    const item = document.createElement("span");
+    item.className = selected
+      ? "rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-emerald-700 font-medium"
+      : "rounded-full border border-line bg-subtle px-3 py-1 text-subtext";
+    item.textContent = selected ? selected.name : fileName;
+    item.title = selected ? `${selected.name} · ${formatBytes(selected.size)}` : fileName;
+    list.appendChild(item);
+  });
+  const missingText = document.getElementById("missingFileList");
+  const badge = document.getElementById("missingFilesBadge");
+  if (missing.length) {
+    missingText.textContent = text("missingFiles", { files: missing.join(", ") });
+    badge.textContent = String(missing.length);
+    badge.classList.remove("hidden");
+  } else {
+    missingText.textContent = text("allFilesReady");
+    badge.classList.add("hidden");
+  }
 }
 
 async function triggerAnalyze() {
@@ -152,9 +236,12 @@ async function triggerAnalyze() {
   }
   const buttonText = document.getElementById("rerunText");
   const button = document.getElementById("rerunBtn");
+  const spinner = document.getElementById("analysisSpinner");
   button.disabled = true;
   button.classList.add("opacity-60", "cursor-wait");
+  spinner.classList.remove("hidden");
   buttonText.textContent = text("analyzing");
+  document.getElementById("workspace").setAttribute("aria-busy", "true");
   const formData = new FormData();
   selectedFiles.forEach((file, field) => formData.append(field, file, file.name));
   try {
@@ -165,14 +252,21 @@ async function triggerAnalyze() {
     selectedRiskId = payload.risks[0]?.risk_id || null;
     priorityFilter = "all";
     zoneFilter = "all";
+    entityFilter = null;
+    apiConnected = true;
+    updateApiStatus();
     document.getElementById("answerBox").classList.add("hidden");
     renderAnalysis();
   } catch (error) {
+    apiConnected = false;
+    updateApiStatus();
     showMessage(text("requestError", { message: error.message }));
   } finally {
     button.disabled = false;
     button.classList.remove("opacity-60", "cursor-wait");
+    spinner.classList.add("hidden");
     buttonText.textContent = text("runBtn");
+    document.getElementById("workspace").setAttribute("aria-busy", "false");
     updateShiftIndicator();
   }
 }
@@ -182,7 +276,11 @@ function renderAnalysis() {
   document.getElementById("statWorkers").textContent = overview?.active_workers ?? "--";
   document.getElementById("statEquipment").textContent = overview?.active_equipment ?? "--";
   document.getElementById("statEvents").textContent = overview?.shift_events ?? "--";
+  document.getElementById("shiftStartValue").textContent = formatDateTime(overview?.shift_started_at);
+  document.getElementById("shiftEndValue").textContent = formatDateTime(overview?.shift_ended_at);
   renderPriorityCounts();
+  updatePriorityFilterState();
+  renderDataQuality();
   renderZoneFilters();
   renderRiskCards();
   renderSelectedRisk();
@@ -196,6 +294,40 @@ function renderPriorityCounts() {
   document.getElementById("count-pri-low").textContent = risks.filter((risk) => risk.priority === "LOW").length;
 }
 
+function renderDataQuality() {
+  const overview = currentAnalysis?.overview;
+  const panel = document.getElementById("dataQualityPanel");
+  const summary = document.getElementById("qualitySummary");
+  const details = document.getElementById("qualityDetails");
+  const badge = document.getElementById("rejectedBadge");
+  details.replaceChildren();
+  if (!overview) {
+    summary.textContent = text("qualityWaiting");
+    badge.classList.add("hidden");
+    panel.open = false;
+    return;
+  }
+  const processing = overview.processing_summary;
+  summary.textContent = text("qualitySummary", {
+    received: processing.received_records,
+    valid: processing.valid_records,
+    rejected: processing.rejected_records
+  });
+  if (processing.rejected_records > 0) {
+    badge.textContent = text("rejectedRecords", { count: processing.rejected_records });
+    badge.classList.remove("hidden");
+    panel.open = true;
+  } else {
+    badge.classList.add("hidden");
+  }
+  overview.files.forEach((file) => {
+    const item = document.createElement("div");
+    item.className = "grid grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-xl bg-subtle/60 px-3.5 py-3 text-xs";
+    item.innerHTML = `<div class="min-w-0"><div class="font-medium text-heavy truncate">${escapeHtml(file.source_file || file.file_type)}</div><div class="text-subtext mt-1">${escapeHtml(file.warnings.join(" · ") || "—")}</div></div><div class="font-mono text-right text-subtext">${file.valid_records}/${file.received_records}<br><span class="${file.rejected_records ? "text-rose-700" : ""}">-${file.rejected_records}</span></div>`;
+    details.appendChild(item);
+  });
+}
+
 function renderZoneFilters() {
   const container = document.getElementById("zoneFiltersContainer");
   container.replaceChildren();
@@ -205,9 +337,10 @@ function renderZoneFilters() {
     button.type = "button";
     button.dataset.zone = value;
     button.textContent = label;
+    button.setAttribute("aria-pressed", String(value === zoneFilter));
     button.className = value === zoneFilter
-      ? "filter-zone-btn px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-heavy text-white"
-      : "filter-zone-btn px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-subtle text-subtext hover:text-heavy";
+      ? "focus-ring filter-zone-btn px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-heavy text-white"
+      : "focus-ring filter-zone-btn px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-subtle text-subtext hover:text-heavy";
     button.addEventListener("click", () => setFilterZone(value));
     container.appendChild(button);
   });
@@ -229,13 +362,17 @@ function priorityPresentation(priority) {
 function renderRiskCards() {
   const container = document.getElementById("riskCardsContainer");
   container.replaceChildren();
+  renderActiveEntityFilter();
   const risks = currentAnalysis?.risks || [];
   if (!currentAnalysis) {
     renderRiskEmpty(container, text("noRisksFeed"));
     document.getElementById("riskCountLabel").textContent = "0";
     return;
   }
-  const filtered = risks.filter((risk) => matchesPriority(risk) && (zoneFilter === "all" || risk.zone_id === zoneFilter));
+  const filtered = risks.filter((risk) => matchesPriority(risk)
+    && (zoneFilter === "all" || risk.zone_id === zoneFilter)
+    && (!entityFilter || risk.affected_entities.some((entity) => entity.id === entityFilter)))
+    .sort((first, second) => second.score - first.score);
   document.getElementById("riskCountLabel").textContent = `${filtered.length} / ${risks.length}`;
   if (!filtered.length) {
     renderRiskEmpty(container, risks.length ? text("noRisksMatch") : text("noRisksDesc"));
@@ -245,17 +382,33 @@ function renderRiskCards() {
     const presentation = priorityPresentation(risk.priority);
     const card = document.createElement("button");
     card.type = "button";
+    card.setAttribute("aria-pressed", String(risk.risk_id === selectedRiskId));
     card.className = risk.risk_id === selectedRiskId
-      ? "w-full text-left p-4 rounded-2xl border bg-subtle/80 border-heavy shadow-sm transition-all"
-      : "w-full text-left p-4 rounded-2xl border bg-surface border-line soft-shadow-hover hover:border-neutral-300 transition-all";
+      ? "focus-ring w-full text-left p-4 rounded-2xl border bg-subtle/80 border-heavy shadow-sm transition-all"
+      : "focus-ring w-full text-left p-4 rounded-2xl border bg-surface border-line soft-shadow-hover hover:border-neutral-300 transition-all";
     const entities = risk.affected_entities.map((entity) => entity.id).join(", ") || "—";
-    card.innerHTML = `<div class="flex items-center justify-between mb-2 gap-3"><div class="flex items-center gap-2 min-w-0"><span class="${presentation.classes} border rounded-full px-2.5 py-0.5 text-[11px] font-semibold">${presentation.label}</span><span class="text-xs font-medium text-subtext truncate">${escapeHtml(risk.zone_id || "—")}</span></div><span class="text-[11px] font-mono text-subtext">${formatDateTime(risk.detected_at)}</span></div><h4 class="text-sm font-semibold text-heavy leading-snug mb-1">${escapeHtml(risk.title)}</h4><p class="text-[11px] text-subtext font-mono truncate">${escapeHtml(entities)}</p>`;
+    card.innerHTML = `<div class="flex items-center justify-between mb-2 gap-3"><div class="flex items-center gap-2 min-w-0"><span class="${presentation.classes} border rounded-full px-2.5 py-0.5 text-[11px] font-semibold">${presentation.label}</span><span class="text-xs font-medium text-subtext truncate">${escapeHtml(risk.zone_id || "—")}</span></div><div class="flex items-center gap-2 shrink-0"><span class="rounded-full bg-heavy text-white px-2.5 py-0.5 text-[11px] font-semibold font-mono">${risk.score}/100</span><span class="text-[11px] font-mono text-subtext">${formatDateTime(risk.detected_at)}</span></div></div><h4 class="text-sm font-semibold text-heavy leading-snug mb-1">${escapeHtml(risk.title)}</h4><p class="text-[11px] text-subtext font-mono truncate">${escapeHtml(entities)}</p>`;
     card.addEventListener("click", () => {
       selectedRiskId = risk.risk_id;
       renderRiskCards();
       renderSelectedRisk();
     });
     container.appendChild(card);
+  });
+}
+
+function renderActiveEntityFilter() {
+  const container = document.getElementById("activeEntityFilter");
+  if (!entityFilter) {
+    container.classList.add("hidden");
+    container.replaceChildren();
+    return;
+  }
+  container.classList.remove("hidden");
+  container.innerHTML = `<button type="button" class="focus-ring w-full flex items-center justify-between rounded-xl border border-line bg-subtle px-3 py-2 text-xs text-heavy"><span>${escapeHtml(text("filteringEntity", { entity: entityFilter }))}</span><span class="text-subtext">${escapeHtml(text("clearEntityFilter"))}</span></button>`;
+  container.querySelector("button").addEventListener("click", () => {
+    entityFilter = null;
+    renderRiskCards();
   });
 }
 
@@ -275,6 +428,8 @@ function renderSelectedRisk() {
     empty.classList.remove("hidden");
     empty.querySelector("h3").textContent = currentAnalysis ? text("noRisksTitle") : text("noDataTitle");
     empty.querySelector("p").textContent = currentAnalysis ? text("noRisksDesc") : text("noDataDesc");
+    document.getElementById("detailEntities").replaceChildren();
+    document.getElementById("exportButton").classList.add("hidden");
     return;
   }
   empty.classList.add("hidden");
@@ -284,11 +439,26 @@ function renderSelectedRisk() {
   badge.className = `${presentation.classes} border rounded-full px-3 py-1 text-xs font-semibold`;
   badge.textContent = presentation.label;
   document.getElementById("detailZone").textContent = risk.zone_id || "—";
-  document.getElementById("detailTime").textContent = formatDateTime(risk.detected_at);
+  document.getElementById("detailTime").textContent = `${formatDateTime(risk.detected_at)} · ${text("score")} ${risk.score}/100`;
   document.getElementById("detailTitle").textContent = risk.title;
-  document.getElementById("detailEntities").textContent = risk.affected_entities.map((entity) => `${entity.type}: ${entity.id}`).join(" · ") || "—";
+  const entities = document.getElementById("detailEntities");
+  entities.replaceChildren();
+  risk.affected_entities.forEach((entity) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "focus-ring rounded-full border border-line bg-subtle px-3 py-1 text-[11px] font-medium text-heavy hover:border-neutral-300";
+    button.textContent = `${entity.type}: ${entity.id}`;
+    button.addEventListener("click", () => {
+      entityFilter = entity.id;
+      renderRiskCards();
+    });
+    entities.appendChild(button);
+  });
   document.getElementById("detailAction").textContent = risk.recommended_action;
   document.getElementById("detailReasoning").textContent = risk.interpretation;
+  const exportButton = document.getElementById("exportButton");
+  exportButton.classList.remove("hidden");
+  exportButton.onclick = () => exportRiskReport(risk);
   renderEvidence(risk);
 }
 
@@ -317,12 +487,18 @@ function renderEvidence(risk) {
 
 function setFilterPriority(priority) {
   priorityFilter = priority;
-  document.querySelectorAll(".filter-pri-btn").forEach((button) => {
-    button.className = button.id === `btn-pri-${priority}`
-      ? "filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all bg-surface text-heavy shadow-sm"
-      : "filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-subtext hover:text-heavy";
-  });
+  updatePriorityFilterState();
   renderRiskCards();
+}
+
+function updatePriorityFilterState() {
+  document.querySelectorAll(".filter-pri-btn").forEach((button) => {
+    const selected = button.id === `btn-pri-${priorityFilter}`;
+    button.setAttribute("aria-pressed", String(selected));
+    button.className = selected
+      ? "focus-ring filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all bg-surface text-heavy shadow-sm"
+      : "focus-ring filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-subtext hover:text-heavy";
+  });
 }
 
 function setFilterZone(zone) {
@@ -349,10 +525,18 @@ async function submitCustomQuery() {
   }
   const answerBox = document.getElementById("answerBox");
   const answerContent = document.getElementById("answerContent");
+  const answerEvidenceList = document.getElementById("answerEvidenceList");
+  const queryButton = document.getElementById("queryButton");
+  const querySpinner = document.getElementById("querySpinner");
+  const queryButtonText = document.getElementById("queryButtonText");
   document.getElementById("answerQuestion").textContent = question;
-  answerContent.textContent = text("analyzing");
-  document.getElementById("answerSources").textContent = "—";
+  answerContent.textContent = text("asking");
+  answerEvidenceList.replaceChildren();
   answerBox.classList.remove("hidden");
+  queryButton.disabled = true;
+  querySpinner.classList.remove("hidden");
+  queryButtonText.classList.add("hidden");
+  document.getElementById("queryInput").disabled = true;
   try {
     const requestPayload = { question };
     const selectedRiskReference = /this (?:alert|risk)|selected (?:alert|risk)|这个(?:告警|风险)|该(?:告警|风险)|этот риск|это предупреждение|осы қауіп/i;
@@ -366,14 +550,116 @@ async function submitCustomQuery() {
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(payload?.detail || `${response.status} ${response.statusText}`);
+    apiConnected = true;
+    updateApiStatus();
     const sections = [payload.answer, payload.interpretation, payload.recommended_action].filter(Boolean);
     if (payload.limitations?.length) sections.push(`${text("limitations")}: ${payload.limitations.join(" · ")}`);
     answerContent.textContent = sections.join("\n\n");
-    const evidenceIds = [...new Set((payload.observed_facts || []).flatMap((fact) => fact.evidence_ids || []))];
-    document.getElementById("answerSources").textContent = evidenceIds.join(", ") || "—";
+    await renderQuestionEvidence(payload.observed_facts || []);
   } catch (error) {
     answerContent.textContent = text("requestError", { message: error.message });
+    renderAnswerEvidenceEmpty(answerEvidenceList, text("evidenceUnavailable"));
+  } finally {
+    queryButton.disabled = false;
+    querySpinner.classList.add("hidden");
+    queryButtonText.classList.remove("hidden");
+    document.getElementById("queryInput").disabled = false;
   }
+}
+
+async function renderQuestionEvidence(facts) {
+  const container = document.getElementById("answerEvidenceList");
+  container.replaceChildren();
+  if (!facts.length) {
+    renderAnswerEvidenceEmpty(container, text("evidenceUnavailable"));
+    return;
+  }
+  for (const fact of facts) {
+    const details = document.createElement("details");
+    details.className = "rounded-xl border border-line bg-surface px-3.5 py-3";
+    const summary = document.createElement("summary");
+    summary.className = "focus-ring cursor-pointer text-xs font-medium text-heavy";
+    summary.textContent = fact.statement;
+    details.appendChild(summary);
+    const evidenceContainer = document.createElement("div");
+    evidenceContainer.className = "grid gap-2 mt-3";
+    details.appendChild(evidenceContainer);
+    container.appendChild(details);
+    for (const evidenceId of fact.evidence_ids || []) {
+      const evidence = await resolveEvidence(evidenceId);
+      evidenceContainer.appendChild(createEvidenceDetail(evidenceId, evidence));
+    }
+  }
+}
+
+async function resolveEvidence(evidenceId) {
+  const localEvidence = (currentAnalysis?.risks || [])
+    .flatMap((risk) => risk.observed_data || [])
+    .find((evidence) => evidence.evidence_id === evidenceId);
+  if (localEvidence) return localEvidence;
+  try {
+    const response = await fetch(apiUrl(`/api/analyses/${encodeURIComponent(currentAnalysis.analysis_id)}/evidence/${encodeURIComponent(evidenceId)}`));
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+function createEvidenceDetail(evidenceId, evidence) {
+  const item = document.createElement("div");
+  item.className = "rounded-lg bg-subtle/70 px-3 py-2.5 text-[11px] text-subtext";
+  if (!evidence) {
+    item.textContent = `${evidenceId} · ${text("evidenceUnavailable")}`;
+    return item;
+  }
+  const facts = Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · ");
+  item.innerHTML = `<div class="font-mono text-heavy">${escapeHtml(evidenceId)}</div><div class="mt-1">${formatDateTime(evidence.timestamp)} · ${escapeHtml(evidence.zone_id || "—")} · ${escapeHtml(evidence.source_file)} · ${text("row")} ${evidence.source_row}</div><div class="mt-1 text-heavy">${escapeHtml(facts)}</div>`;
+  return item;
+}
+
+function renderAnswerEvidenceEmpty(container, message) {
+  const empty = document.createElement("div");
+  empty.className = "rounded-lg border border-dashed border-line px-3 py-2 text-[11px] text-subtext";
+  empty.textContent = message;
+  container.appendChild(empty);
+}
+
+function exportRiskReport(risk) {
+  const overview = currentAnalysis.overview;
+  const lines = [
+    risk.title,
+    `${text("score")}: ${risk.score}/100`,
+    `${text("filterPriority")}: ${risk.priority}`,
+    `${text("operatingZone")}: ${risk.zone_id || "—"}`,
+    `${text("shiftStart")}: ${formatDateTime(overview.shift_started_at)}`,
+    `${text("shiftEnd")}: ${formatDateTime(overview.shift_ended_at)}`,
+    "",
+    `${text("recommendedProtocol")}:`,
+    risk.recommended_action,
+    "",
+    `${text("analysisReasoning")}:`,
+    risk.interpretation,
+    "",
+    `${text("evidenceHeader")}:`,
+    ...risk.observed_data.map((evidence) => {
+      const facts = Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · ");
+      return `${formatDateTime(evidence.timestamp)} | ${evidence.zone_id || "—"} | ${evidence.source_file}:${evidence.source_row} | ${facts}`;
+    }),
+    "",
+    `${text("limitations")}:`,
+    ...(risk.limitations.length ? risk.limitations : ["—"])
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${risk.risk_id}-report.txt`;
+  link.hidden = true;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function formatDateTime(value) {
@@ -385,10 +671,18 @@ function formatDateTime(value) {
   }).format(date);
 }
 
+function formatBytes(value) {
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
   })[character]);
 }
 
+renderFileStatus();
 changeLanguage("en");
+checkApiStatus();
