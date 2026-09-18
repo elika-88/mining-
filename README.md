@@ -30,6 +30,7 @@ uvicorn app.main:app --reload
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/health` | Service health |
+| `GET` | `/api/config/risk-thresholds` | Active prototype policy thresholds |
 | `POST` | `/api/analyses` | Upload four CSV files and start analysis |
 | `GET` | `/api/analyses/{analysis_id}/overview` | Shift overview |
 | `GET` | `/api/analyses/{analysis_id}/risks` | Prioritized risks |
@@ -46,4 +47,6 @@ uvicorn app.main:app --reload
 - Unknown analysis, risk, and evidence IDs return `404`.
 - The dataset's latest valid timestamp is treated as the current shift time.
 - Active workers and equipment use their latest record within the final 30 minutes of the dataset.
-- Risk detection is the next implementation phase, so uploaded analyses currently return an empty risk list.
+- Deterministic risk detection covers severe events, worker-equipment co-presence, environmental conditions, abnormal statuses, and telemetry inconsistencies.
+- Every risk exposes its score breakdown, source evidence, interpretation, action, and limitations.
+- Natural-language grounded question answering is the next implementation phase.

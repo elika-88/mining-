@@ -23,5 +23,11 @@ Expected ingestion result:
 - shift events: 2;
 - dataset time range: `2026-09-19T14:45:00` to `2026-09-19T15:30:00`.
 
-Risk detection is not part of ingestion phase 2, so the current API returns an empty risk list
-even though this dataset contains signals intended for the next rule-engine phase.
+Expected risk result:
+
+- 5 prioritized risks;
+- 4 HIGH or CRITICAL risks;
+- top risk: critical event `E-002`, score 91;
+- worker-equipment conflict involving `W-001` and `T-01`;
+- adverse Zone B environmental conditions;
+- abnormal maintenance status for `L-02`.

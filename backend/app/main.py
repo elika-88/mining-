@@ -1,12 +1,15 @@
+from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import THRESHOLDS
 from app.models.responses import (
     AnalysisResponse,
     Evidence,
     Overview,
+    Priority,
     QuestionAnswer,
     QuestionRequest,
     Risk,
@@ -17,10 +20,10 @@ from app.store.memory import StoredAnalysis, analysis_store
 
 app = FastAPI(
     title="Mine Safety Incident Prevention API",
-    version="0.2.0",
+    version="0.3.0",
     description=(
-        "Mine-shift CSV ingestion API with row-level validation and evidence provenance. "
-        "Deterministic risk detection is implemented in the next phase."
+        "Mine-shift CSV ingestion and deterministic risk analysis API with row-level "
+        "validation, evidence provenance, transparent scoring, and prioritized risks."
     ),
 )
 
@@ -43,6 +46,11 @@ def require_analysis(analysis_id: str) -> StoredAnalysis:
 @app.get("/api/health", tags=["system"])
 def health() -> dict[str, str]:
     return {"status": "ok", "version": app.version}
+
+
+@app.get("/api/config/risk-thresholds", tags=["system"])
+def risk_thresholds() -> dict[str, float]:
+    return asdict(THRESHOLDS)
 
 
 @app.post(
@@ -86,8 +94,24 @@ def get_overview(analysis_id: str) -> Overview:
     response_model=list[Risk],
     tags=["risks"],
 )
-def list_risks(analysis_id: str) -> list[Risk]:
-    return require_analysis(analysis_id).response.risks
+def list_risks(
+    analysis_id: str,
+    priority: Annotated[Priority | None, Query()] = None,
+    zone_id: Annotated[str | None, Query()] = None,
+    entity_id: Annotated[str | None, Query()] = None,
+) -> list[Risk]:
+    risks = require_analysis(analysis_id).response.risks
+    if priority is not None:
+        risks = [risk for risk in risks if risk.priority == priority]
+    if zone_id is not None:
+        risks = [risk for risk in risks if risk.zone_id == zone_id]
+    if entity_id is not None:
+        risks = [
+            risk
+            for risk in risks
+            if any(entity.id == entity_id for entity in risk.affected_entities)
+        ]
+    return risks
 
 
 @app.get(
@@ -122,19 +146,20 @@ def get_evidence(analysis_id: str, evidence_id: str) -> Evidence:
     tags=["assistant"],
 )
 def ask_question(analysis_id: str, request: QuestionRequest) -> QuestionAnswer:
-    require_analysis(analysis_id)
+    analysis = require_analysis(analysis_id)
+    risk_count = len(analysis.response.risks)
     return QuestionAnswer(
         question=request.question,
         answer=(
-            "The uploaded CSV files were processed successfully, but risk detection and "
-            "grounded natural-language analysis are not enabled in this ingestion phase."
+            f"Deterministic analysis detected {risk_count} risk(s). Grounded natural-language "
+            "question answering is not enabled yet; use the prioritized risk and evidence endpoints."
         ),
-        answer_mode="ingestion_only",
+        answer_mode="risk_summary_fallback",
         observed_facts=[],
         interpretation=None,
         recommended_action=None,
         limitations=[
-            "No safety conclusion was generated from the uploaded records.",
-            "Use the overview and file warnings to inspect data quality.",
+            "This response reports only the deterministic risk count.",
+            "Natural-language answers grounded to individual evidence are implemented next.",
         ],
     )
