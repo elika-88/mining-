@@ -111,3 +111,6 @@ class AnalysisResponse(ApiModel):
 
 class QuestionRequest(ApiModel):
     question: str = Field(min_length=1, max_length=1000)
+    risk_id: str | None = None
+    zone_id: str | None = None
+    entity_id: str | None = None

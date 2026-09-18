@@ -1,6 +1,10 @@
 import os
 from dataclasses import dataclass
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def env_float(name: str, default: float) -> float:
     raw_value = os.getenv(name)
@@ -26,4 +30,3 @@ class RiskThresholds:
 
 
 THRESHOLDS = RiskThresholds()
-

@@ -1,3 +1,4 @@
+import os
 from dataclasses import asdict
 from typing import Annotated
 
@@ -16,11 +17,12 @@ from app.models.responses import (
 )
 from app.services.analysis import build_analysis
 from app.services.ingestion import ingest_files
+from app.services.qa import answer_question
 from app.store.memory import StoredAnalysis, analysis_store
 
 app = FastAPI(
     title="Mine Safety Incident Prevention API",
-    version="0.3.0",
+    version="0.4.0",
     description=(
         "Mine-shift CSV ingestion and deterministic risk analysis API with row-level "
         "validation, evidence provenance, transparent scoring, and prioritized risks."
@@ -51,6 +53,17 @@ def health() -> dict[str, str]:
 @app.get("/api/config/risk-thresholds", tags=["system"])
 def risk_thresholds() -> dict[str, float]:
     return asdict(THRESHOLDS)
+
+
+@app.get("/api/config/ai", tags=["system"])
+def ai_configuration() -> dict[str, str | bool | None]:
+    model = os.getenv("AI_MODEL")
+    configured = bool((os.getenv("OPENAI_API_KEY") or os.getenv("AI_API_KEY")) and model)
+    return {
+        "configured": configured,
+        "model": model,
+        "fallback_available": True,
+    }
 
 
 @app.post(
@@ -147,19 +160,10 @@ def get_evidence(analysis_id: str, evidence_id: str) -> Evidence:
 )
 def ask_question(analysis_id: str, request: QuestionRequest) -> QuestionAnswer:
     analysis = require_analysis(analysis_id)
-    risk_count = len(analysis.response.risks)
-    return QuestionAnswer(
-        question=request.question,
-        answer=(
-            f"Deterministic analysis detected {risk_count} risk(s). Grounded natural-language "
-            "question answering is not enabled yet; use the prioritized risk and evidence endpoints."
-        ),
-        answer_mode="risk_summary_fallback",
-        observed_facts=[],
-        interpretation=None,
-        recommended_action=None,
-        limitations=[
-            "This response reports only the deterministic risk count.",
-            "Natural-language answers grounded to individual evidence are implemented next.",
-        ],
+    return answer_question(
+        request.question,
+        analysis,
+        risk_id=request.risk_id,
+        zone_id=request.zone_id,
+        entity_id=request.entity_id,
     )

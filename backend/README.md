@@ -40,8 +40,41 @@ Implemented risk families:
 - stopped-equipment telemetry inconsistencies.
 
 Every risk includes source rows, observed facts, interpretation, recommended action,
-limitations, affected entities, and a score breakdown. Natural-language question answering is
-the next implementation phase; the current question endpoint returns a deterministic summary.
+limitations, affected entities, and a score breakdown.
+
+## Grounded AI assistant
+
+`POST /api/analyses/{analysis_id}/questions` supports top-risk, zone-risk, affected-entity,
+evidence, recent-change, and shift-overview questions. Every observed fact contains evidence IDs
+that resolve through the evidence endpoint.
+
+The request accepts optional `risk_id`, `zone_id`, and `entity_id` context. Frontends should send
+the selected risk ID for questions such as “What evidence supports this alert?” Context is
+validated against the current analysis and identifiers from another analysis are rejected.
+
+The optional OpenAI Responses API integration uses structured output only to classify the
+question and extract parameters from identifiers already present in the analysis. Final answers,
+facts, values, timestamps, recommendations, and limitations are generated deterministically by
+the backend. This prevents the model from adding unsupported mine data.
+
+Configuration:
+
+```env
+OPENAI_API_KEY=your-key
+AI_MODEL=your-available-model-id
+```
+
+`AI_API_KEY` is accepted as an alternative key name. If the key or model is absent, the API
+times out, the provider fails, or the structured route is invalid, the endpoint automatically
+uses `deterministic_fallback`. No API key is required for the fallback.
+
+Values can be placed in `backend/.env`; the application loads this file at startup. The read-only
+`GET /api/config/ai` endpoint reports whether routing is configured and never returns the key.
+
+The Responses API structured-output implementation follows the official OpenAI documentation:
+
+- https://developers.openai.com/api/docs/guides/structured-outputs
+- https://developers.openai.com/api/docs/guides/text?api-mode=responses
 
 ## Frontend integration
 
@@ -74,6 +107,15 @@ claims that a prototype threshold is a regulatory limit.
 The active values are available at `GET /api/config/risk-thresholds`. Event severities accept
 text labels and the common numeric `4 = high`, `5 = critical` convention; this mapping is a
 documented prototype assumption.
+
+## Known limitations
+
+- In-memory analyses are lost when the server restarts.
+- The deterministic language router targets the documented English examples and common Chinese terms.
+- The optional model improves intent routing only; it does not replace deterministic analysis.
+- Zone records do not provide exact worker-equipment distance.
+- Sensor and speed units are not defined by the challenge schema.
+- Prototype policy thresholds must be aligned with the actual site's operating standards.
 
 ## Test
 

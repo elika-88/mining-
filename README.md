@@ -31,6 +31,7 @@ uvicorn app.main:app --reload
 | --- | --- | --- |
 | `GET` | `/api/health` | Service health |
 | `GET` | `/api/config/risk-thresholds` | Active prototype policy thresholds |
+| `GET` | `/api/config/ai` | AI routing status without exposing credentials |
 | `POST` | `/api/analyses` | Upload four CSV files and start analysis |
 | `GET` | `/api/analyses/{analysis_id}/overview` | Shift overview |
 | `GET` | `/api/analyses/{analysis_id}/risks` | Prioritized risks |
@@ -49,4 +50,24 @@ uvicorn app.main:app --reload
 - Active workers and equipment use their latest record within the final 30 minutes of the dataset.
 - Deterministic risk detection covers severe events, worker-equipment co-presence, environmental conditions, abnormal statuses, and telemetry inconsistencies.
 - Every risk exposes its score breakdown, source evidence, interpretation, action, and limitations.
-- Natural-language grounded question answering is the next implementation phase.
+- Grounded natural-language questions are routed by an optional OpenAI model and answered from deterministic backend facts.
+- Missing API keys, model errors, and timeouts automatically use the same evidence-grounded deterministic fallback.
+
+## AI assistant
+
+Set `OPENAI_API_KEY` (or `AI_API_KEY`) and `AI_MODEL` to enable OpenAI Responses API routing.
+The model receives only the question and the identifiers available in the current analysis. It
+returns a structured intent and cannot create risk records, evidence, sensor values, scores, or
+recommendations. The backend builds the final answer and validates every evidence ID.
+
+Without AI configuration, the same endpoint answers the required demonstration questions using
+the deterministic fallback. The response field `answer_mode` is either `llm_routed` or
+`deterministic_fallback`.
+
+Supported operational questions include:
+
+- Which risk requires immediate attention?
+- Why is Zone B dangerous?
+- Which workers or vehicles are affected?
+- What changed during the last 30 minutes?
+- What evidence supports this alert?

@@ -350,10 +350,15 @@ async function submitCustomQuery() {
   document.getElementById("answerSources").textContent = "—";
   answerBox.classList.remove("hidden");
   try {
+    const requestPayload = { question };
+    const selectedRiskReference = /this (?:alert|risk)|selected (?:alert|risk)|这个(?:告警|风险)|该(?:告警|风险)|этот риск|это предупреждение|осы қауіп/i;
+    if (selectedRiskId && selectedRiskReference.test(question)) {
+      requestPayload.risk_id = selectedRiskId;
+    }
     const response = await fetch(apiUrl(`/api/analyses/${encodeURIComponent(currentAnalysis.analysis_id)}/questions`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question })
+      body: JSON.stringify(requestPayload)
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(payload?.detail || `${response.status} ${response.statusText}`);

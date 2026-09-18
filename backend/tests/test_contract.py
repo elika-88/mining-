@@ -45,7 +45,7 @@ def create_valid_analysis() -> dict:
 def test_health() -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "version": "0.3.0"}
+    assert response.json() == {"status": "ok", "version": "0.4.0"}
 
 
 def test_requires_at_least_one_file() -> None:
@@ -222,7 +222,7 @@ def test_active_counts_use_latest_status_and_dataset_time_window() -> None:
     assert overview["active_workers"] == 1
 
 
-def test_question_fallback_reports_only_deterministic_risk_count() -> None:
+def test_question_handles_analysis_with_no_detected_risks() -> None:
     created = create_valid_analysis()
     response = client.post(
         f"/api/analyses/{created['analysis_id']}/questions",
@@ -230,9 +230,9 @@ def test_question_fallback_reports_only_deterministic_risk_count() -> None:
     )
     assert response.status_code == 200
     payload = response.json()
-    assert payload["answer_mode"] == "risk_summary_fallback"
-    assert "detected 0 risk(s)" in payload["answer"]
-    assert "not enabled yet" in payload["answer"]
+    assert payload["answer_mode"] == "deterministic_fallback"
+    assert "No risks were detected" in payload["answer"]
+    assert payload["observed_facts"] == []
 
 
 def test_unknown_analysis_returns_404() -> None:
