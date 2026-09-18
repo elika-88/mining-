@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MineShift Safety Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            canvas: '#F8F9FA',
+            surface: '#FFFFFF',
+            subtle: '#F1F3F5',
+            line: '#E9ECEF',
+            subtext: '#6C757D',
+            heavy: '#212529',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #F8F9FA; color: #212529; -webkit-font-smoothing: antialiased; }
+    .soft-shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02); }
+    .soft-shadow-hover:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .app-header { display: grid; grid-template-columns: minmax(260px, 1fr) auto; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, 116px); }
+    .metric-item { min-width: 0; }
+    .metric-label { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .language-select { width: 136px; min-width: 136px; }
+    .data-button { width: 124px; min-width: 124px; }
+    .analysis-button { width: 112px; min-width: 112px; justify-content: center; }
+    .data-button,
+    .analysis-button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 1180px) {
+      .app-header { grid-template-columns: 1fr; }
+      .header-actions { justify-content: space-between; }
+    }
+    @media (max-width: 720px) {
+      .metric-grid { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(82px, 1fr)); width: 100%; }
+      .header-actions { display: grid; grid-template-columns: 1fr auto; width: 100%; }
+      .header-controls { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; }
+      .language-control { grid-column: 1 / -1; width: 100%; }
+      .language-select,
+      .data-button,
+      .analysis-button { width: 100%; min-width: 0; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+  <!-- 1. Top Bar -->
+  <header class="app-header w-full bg-surface border-b border-line px-4 lg:px-8 py-3.5 items-center gap-4 sticky top-0 z-30">
+    <div class="flex min-w-0 items-center gap-4">
+      <span class="min-w-0 truncate text-base font-semibold tracking-tight text-heavy" data-i18n="appTitle">MineShift Safety Console</span>
+      <div class="h-4 w-px bg-line"></div>
+      <div class="min-w-[180px] max-w-[260px] flex items-center gap-2 bg-subtle px-3 py-1 rounded-full text-xs font-medium text-subtext">
+        <span id="shiftIndicator" class="truncate" data-i18n="awaitingShift">Awaiting Shift Dataset</span>
+      </div>
+    </div>
+
+    <div class="header-actions flex flex-wrap items-center justify-end gap-4 lg:gap-6">
+      <div class="metric-grid gap-2 text-xs text-subtext font-medium" aria-label="Shift statistics">
+        <div class="metric-item border-r border-line pr-3">
+          <span class="metric-label" data-i18n="workersLabel">Active Workers</span>
+          <span id="statWorkers" class="block text-heavy font-semibold font-mono mt-0.5">--</span>
+        </div>
+        <div class="metric-item border-r border-line px-3">
+          <span class="metric-label" data-i18n="equipmentLabel">Fleet Units</span>
+          <span id="statEquipment" class="block text-heavy font-semibold font-mono mt-0.5">--</span>
+        </div>
+        <div class="metric-item pl-3">
+          <span class="metric-label" data-i18n="eventsLabel">Open Events</span>
+          <span id="statEvents" class="block text-heavy font-semibold font-mono mt-0.5">--</span>
+        </div>
+      </div>
+
+      <div class="header-controls flex items-center gap-2">
+        <label for="languageSelect" class="sr-only">Language</label>
+        <div class="language-control relative shrink-0">
+          <select id="languageSelect" class="language-select appearance-none bg-subtle border border-transparent hover:border-line focus:border-heavy focus:bg-surface rounded-xl pl-3 pr-8 py-2 text-xs font-medium text-heavy outline-none transition-colors cursor-pointer" aria-label="Language" onchange="changeLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="kk">Қазақша</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+          </select>
+          <svg class="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtext" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="m6 8 4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <input type="file" id="csvFileInput" multiple accept=".csv,text/csv" class="hidden" onchange="handleFilesUpload(event)" />
+        <button onclick="document.getElementById('csvFileInput').click()" class="data-button bg-subtle hover:bg-neutral-200 text-heavy px-3.5 py-2 rounded-xl text-xs font-medium transition-colors" data-i18n="importBtn">Import CSVs</button>
+        <button id="rerunBtn" onclick="triggerAnalyze()" class="analysis-button bg-heavy text-white px-4 py-2 rounded-xl text-xs font-medium hover:bg-black transition-all flex items-center gap-2">
+          <span id="rerunText" data-i18n="runBtn">Run Analysis</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Main Workspace -->
+  <main class="flex-1 max-w-[1720px] w-full mx-auto p-6 grid grid-cols-12 gap-6 items-start">
+    <section class="col-span-12 lg:col-span-7 flex flex-col gap-6">
+      <div id="inspectorContainer" class="bg-surface border border-line rounded-2xl p-7 soft-shadow">
+        <div id="emptyInspector" class="py-20 flex flex-col items-center justify-center text-center">
+          <div class="w-12 h-12 rounded-2xl bg-subtle flex items-center justify-center mb-3">
+            <svg class="w-6 h-6 text-subtext" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+          </div>
+          <h3 class="text-sm font-semibold text-heavy mb-1" data-i18n="noDataTitle">No Shift Data Loaded</h3>
+          <p class="text-xs text-subtext max-w-sm" data-i18n="noDataDesc">Import shift CSV files or connect the backend API to generate risk analysis.</p>
+        </div>
+
+        <div id="activeInspectorContent" class="hidden">
+          <div class="flex items-start justify-between gap-4 pb-6 border-b border-line">
+            <div>
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <span id="detailPriorityBadge" class="bg-rose-50 text-rose-700 border border-rose-100 rounded-full px-3 py-1 text-xs font-semibold">High</span>
+                <span id="detailZone" class="bg-subtle text-subtext rounded-full px-3 py-1 text-xs font-medium">Zone --</span>
+                <span id="detailTime" class="text-xs text-subtext font-mono">--:--</span>
+              </div>
+              <h2 id="detailTitle" class="text-xl font-bold text-heavy tracking-tight"></h2>
+              <p id="detailEntities" class="text-xs text-subtext mt-1 font-mono"></p>
+            </div>
+          </div>
+
+          <div class="mt-6 bg-[#FDFBF7] border border-[#F2ECE1] rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-[#8F6B32] uppercase tracking-wider" data-i18n="recommendedProtocol">Recommended Protocol</span>
+              <span class="text-[11px] text-[#A88C5E]" data-i18n="actionDispatch">Action Dispatch</span>
+            </div>
+            <p id="detailAction" class="text-sm font-medium text-[#423319] leading-relaxed"></p>
+          </div>
+
+          <div class="mt-6">
+            <div class="flex items-center justify-between mb-3.5">
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-subtext" data-i18n="evidenceHeader">Supporting Evidence (Observed Shift Data)</h3>
+              <span id="evidenceCount" class="text-[11px] text-subtext font-mono"></span>
+            </div>
+            <div id="evidenceList" class="flex flex-col gap-2.5"></div>
+          </div>
+
+          <div class="mt-6 pt-5 border-t border-line">
+            <div class="text-xs font-semibold text-subtext uppercase tracking-wider mb-2" data-i18n="analysisReasoning">Analysis Reasoning</div>
+            <p id="detailReasoning" class="text-xs text-subtext leading-relaxed"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-surface border border-line rounded-2xl p-6 soft-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-heavy" data-i18n="qaTitle">Shift Inquiry & QA</h3>
+          <span class="text-xs text-subtext" data-i18n="qaSubtitle">Grounded in Shift Dataset</span>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button onclick="askQuestion(i18n[currentLang].q1)" class="bg-subtle hover:bg-neutral-200 text-heavy text-xs px-3.5 py-1.5 rounded-full font-medium transition-colors" data-i18n="q1">Why is Zone B considered dangerous?</button>
+          <button onclick="askQuestion(i18n[currentLang].q2)" class="bg-subtle hover:bg-neutral-200 text-heavy text-xs px-3.5 py-1.5 rounded-full font-medium transition-colors" data-i18n="q2">Which entities are affected?</button>
+          <button onclick="askQuestion(i18n[currentLang].q3)" class="bg-subtle hover:bg-neutral-200 text-heavy text-xs px-3.5 py-1.5 rounded-full font-medium transition-colors" data-i18n="q3">What changed in last 30 min?</button>
+        </div>
+
+        <div class="relative">
+          <input id="queryInput" type="text" placeholder="Ask specific questions about shift telemetry..." class="w-full bg-subtle focus:bg-surface border border-transparent focus:border-line rounded-xl px-4 py-3 text-xs outline-none transition-all pr-24" onkeydown="if(event.key==='Enter') submitCustomQuery()" />
+          <button onclick="submitCustomQuery()" class="absolute right-2 top-2 bg-heavy text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-black transition-colors" data-i18n="sendQuery">Query</button>
+        </div>
+
+        <div id="answerBox" class="mt-4 p-4 bg-subtle/70 rounded-xl border border-line hidden">
+          <div class="flex items-center justify-between mb-1.5">
+            <span id="answerQuestion" class="text-xs font-semibold text-heavy"></span>
+            <span class="text-[11px] text-subtext font-mono" data-i18n="matchVerified">Grounding Verified</span>
+          </div>
+          <p id="answerContent" class="text-xs text-subtext leading-relaxed mb-2.5"></p>
+          <div class="text-[11px] font-mono text-neutral-400"><span data-i18n="sourceRef">Source references</span>: <span id="answerSources" class="text-subtext"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Right Aside -->
+    <aside class="col-span-12 lg:col-span-5 flex flex-col gap-6">
+      <div class="bg-surface border border-line rounded-2xl p-6 soft-shadow flex flex-col gap-5">
+        <div>
+          <div class="text-xs font-semibold text-subtext uppercase tracking-wider mb-2.5" data-i18n="filterPriority">Priority Filter</div>
+          <div class="flex items-center gap-1.5 bg-subtle p-1 rounded-xl">
+            <button onclick="setFilterPriority('all')" id="btn-pri-all" class="filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all bg-surface text-heavy shadow-sm"><span data-i18n="filterAll">All</span> (<span id="count-pri-all">0</span>)</button>
+            <button onclick="setFilterPriority('high')" id="btn-pri-high" class="filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-subtext hover:text-heavy"><span data-i18n="filterHigh">High</span> (<span id="count-pri-high">0</span>)</button>
+            <button onclick="setFilterPriority('medium')" id="btn-pri-medium" class="filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-subtext hover:text-heavy"><span data-i18n="filterMed">Med</span> (<span id="count-pri-medium">0</span>)</button>
+            <button onclick="setFilterPriority('low')" id="btn-pri-low" class="filter-pri-btn flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-subtext hover:text-heavy"><span data-i18n="filterLow">Low</span> (<span id="count-pri-low">0</span>)</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-xs font-semibold text-subtext uppercase tracking-wider mb-2.5" data-i18n="operatingZone">Operating Zone</div>
+          <div id="zoneFiltersContainer" class="flex flex-wrap gap-2">
+            <button onclick="setFilterZone('all')" class="filter-zone-btn px-3.5 py-1.5 rounded-full text-xs font-medium transition-all bg-heavy text-white" data-zone="all"><span data-i18n="allSectors">All Sectors</span></button>
+          </div>
+        </div>
+
+        <div class="h-px bg-line w-full"></div>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold text-heavy" data-i18n="detectedSituations">Detected Situations</span>
+            <span id="riskCountLabel" class="text-xs text-subtext font-mono">0 risks</span>
+          </div>
+          <div id="riskCardsContainer" class="flex flex-col gap-3">
+            <div id="emptyRiskFeed" class="p-8 text-center text-xs text-subtext bg-subtle/50 rounded-2xl border border-dashed border-line" data-i18n="noRisksFeed">No shift incidents loaded.</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
