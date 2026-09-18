@@ -1,0 +1,83 @@
+{
+  "analysis_id": "demo-analysis-001",
+  "overview": {
+    "analysis_id": "demo-analysis-001",
+    "status": "completed",
+    "shift_started_at": "2026-09-19T07:00:00",
+    "shift_ended_at": "2026-09-19T15:30:00",
+    "active_workers": 42,
+    "active_equipment": 18,
+    "shift_events": 6,
+    "high_priority_risks": 1,
+    "processing_summary": {
+      "received_records": 1000,
+      "valid_records": 974,
+      "rejected_records": 26,
+      "warnings": [
+        "26 malformed records were isolated and excluded from analysis."
+      ]
+    }
+  },
+  "risks": [
+    {
+      "risk_id": "risk-001",
+      "title": "Potential worker–vehicle conflict",
+      "priority": "HIGH",
+      "score": 82,
+      "zone_id": "Zone B",
+      "detected_at": "2026-09-19T15:24:00",
+      "affected_entities": [
+        {
+          "type": "worker",
+          "id": "W-17"
+        },
+        {
+          "type": "equipment",
+          "id": "T-04"
+        }
+      ],
+      "observed_data": [
+        {
+          "evidence_id": "ev-worker-001",
+          "source_file": "workers.csv",
+          "source_row": 28,
+          "timestamp": "2026-09-19T15:21:00",
+          "zone_id": "Zone B",
+          "facts": {
+            "worker_id": "W-17",
+            "zone_id": "Zone B",
+            "status": "active"
+          },
+          "validation_issues": []
+        },
+        {
+          "evidence_id": "ev-equipment-001",
+          "source_file": "equipment.csv",
+          "source_row": 14,
+          "timestamp": "2026-09-19T15:24:00",
+          "zone_id": "Zone B",
+          "facts": {
+            "equipment_id": "T-04",
+            "equipment_type": "truck",
+            "zone_id": "Zone B",
+            "speed": 27.0
+          },
+          "validation_issues": []
+        }
+      ],
+      "interpretation": "A worker and moving equipment were recorded in the same zone within three minutes. This indicates a potential conflict requiring verification.",
+      "recommended_action": "Verify the current positions of W-17 and T-04 and contact the Zone B coordinator.",
+      "limitations": [
+        "Precise coordinates are unavailable.",
+        "Physical distance between the worker and equipment cannot be determined."
+      ],
+      "score_breakdown": {
+        "severity": 30,
+        "immediacy": 18,
+        "exposure": 12,
+        "corroboration": 15,
+        "magnitude": 7
+      }
+    }
+  ]
+}
