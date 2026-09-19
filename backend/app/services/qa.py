@@ -225,6 +225,7 @@ def insufficient_answer(question: str, message: str, limitation: str) -> Questio
         question=question,
         answer=message,
         answer_mode="deterministic_fallback",
+        fallback_reason="insufficient_grounded_data",
         observed_facts=[],
         interpretation=None,
         recommended_action=None,
@@ -480,6 +481,13 @@ def answer_question(
     ai_route = route_with_openai(question, analysis)
     route = ai_route or deterministic_route(question, analysis)
     mode = "llm_routed" if ai_route else "deterministic_fallback"
+    model_used = os.getenv("AI_MODEL") if ai_route else None
+    ai_configured = bool(
+        (os.getenv("OPENAI_API_KEY") or os.getenv("AI_API_KEY")) and os.getenv("AI_MODEL")
+    )
+    fallback_reason = None if ai_route else (
+        "ai_route_unavailable" if ai_configured else "ai_not_configured"
+    )
 
     valid_risk_ids = {risk.risk_id for risk in analysis.response.risks}
     if risk_id is not None and risk_id not in valid_risk_ids:
@@ -503,22 +511,41 @@ def answer_question(
     route.risk_id = risk_id or route.risk_id
     route.zone_id = zone_id or route.zone_id
     route.entity_id = entity_id or route.entity_id
+    lowered_question = question.casefold()
+    if risk_id and any(
+        term in lowered_question for term in ("evidence", "support", "alert", "证据", "依据")
+    ):
+        route.intent = QuestionIntent.RISK_EVIDENCE
+    elif zone_id and any(
+        term in lowered_question for term in ("why", "danger", "risk", "危险", "风险")
+    ):
+        route.intent = QuestionIntent.ZONE_RISK
+    elif entity_id and any(
+        term in lowered_question
+        for term in ("affected", "worker", "vehicle", "equipment", "人员", "车辆", "设备")
+    ):
+        route.intent = QuestionIntent.AFFECTED_ENTITIES
     risks = matching_risks(route, analysis.response.risks)
 
     if route.intent == QuestionIntent.TOP_RISK:
-        return answer_top_risk(question, risks, mode)
-    if route.intent == QuestionIntent.ZONE_RISK:
-        return answer_zone(question, route, risks, mode)
-    if route.intent == QuestionIntent.AFFECTED_ENTITIES:
-        return answer_affected(question, risks, mode)
-    if route.intent == QuestionIntent.RISK_EVIDENCE:
-        return answer_evidence(question, risks, mode)
-    if route.intent == QuestionIntent.RECENT_CHANGES:
-        return answer_changes(question, analysis, route, mode)
-    if route.intent == QuestionIntent.INSUFFICIENT:
-        return insufficient_answer(
+        answer = answer_top_risk(question, risks, mode)
+    elif route.intent == QuestionIntent.ZONE_RISK:
+        answer = answer_zone(question, route, risks, mode)
+    elif route.intent == QuestionIntent.AFFECTED_ENTITIES:
+        answer = answer_affected(question, risks, mode)
+    elif route.intent == QuestionIntent.RISK_EVIDENCE:
+        answer = answer_evidence(question, risks, mode)
+    elif route.intent == QuestionIntent.RECENT_CHANGES:
+        answer = answer_changes(question, analysis, route, mode)
+    elif route.intent == QuestionIntent.INSUFFICIENT:
+        answer = insufficient_answer(
             question,
             "The requested zone, entity, or risk was not found in the uploaded data.",
             "The system does not infer identifiers that are absent from the dataset.",
         )
-    return answer_overview(question, analysis, mode)
+    else:
+        answer = answer_overview(question, analysis, mode)
+    answer.model_used = model_used
+    if answer.answer_mode == "deterministic_fallback" and answer.fallback_reason is None:
+        answer.fallback_reason = fallback_reason
+    return answer

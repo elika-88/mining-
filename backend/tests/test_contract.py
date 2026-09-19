@@ -46,7 +46,7 @@ def create_valid_analysis() -> dict:
 def test_health() -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "version": "0.5.0"}
+    assert response.json() == {"status": "ok", "version": "0.6.0"}
 
 
 def test_requires_at_least_one_file() -> None:
@@ -81,6 +81,11 @@ def test_valid_files_create_real_overview() -> None:
     assert overview["shift_ended_at"] == "2026-09-19T08:20:00"
     assert overview["processing_summary"]["valid_records"] == 5
     assert overview["processing_summary"]["rejected_records"] == 0
+    metadata = payload["metadata"]
+    assert metadata["engine_version"] == "0.6.0"
+    assert metadata["source_of_truth"] == "uploaded_csv"
+    assert len(metadata["data_fingerprint"]) == 64
+    assert metadata["thresholds"]["active_window_minutes"] == 30
 
 
 def test_analysis_can_be_retrieved() -> None:
@@ -310,6 +315,50 @@ def test_malformed_csv_row_does_not_hide_later_valid_rows() -> None:
     assert summary["received_records"] == 2
     assert summary["valid_records"] == 1
     assert summary["rejected_records"] == 1
+
+
+def test_quoted_multiline_field_is_preserved() -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "events": csv_upload(
+                "events.csv",
+                "event_id,timestamp,zone_id,event_type,severity,description\n"
+                'E-1,2026-09-19T08:00:00,Zone A,inspection,high,"line one\nline two"\n',
+            )
+        },
+    )
+    assert response.status_code == 201
+    payload = response.json()
+    summary = payload["overview"]["processing_summary"]
+    assert summary["received_records"] == 1
+    assert summary["valid_records"] == 1
+    assert summary["rejected_records"] == 0
+    assert payload["risks"][0]["observed_data"][0]["facts"]["description"] == "line one\nline two"
+
+
+def test_mixed_dated_and_time_only_records_are_not_compared() -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "workers": csv_upload(
+                "workers.csv",
+                "worker_id,timestamp,zone_id,status\n"
+                "W-1,08:00,Zone A,active\n"
+                "W-2,2026-09-19T08:05:00,Zone B,active\n",
+            )
+        },
+    )
+    assert response.status_code == 201
+    overview = response.json()["overview"]
+    assert overview["active_workers"] == 1
+    assert overview["processing_summary"]["received_records"] == 2
+    assert overview["processing_summary"]["valid_records"] == 1
+    assert overview["processing_summary"]["rejected_records"] == 1
+    assert any(
+        "calendar date cannot be grounded" in warning
+        for warning in overview["processing_summary"]["warnings"]
+    )
 
 
 def test_active_counts_use_latest_status_and_dataset_time_window() -> None:

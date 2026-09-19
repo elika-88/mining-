@@ -138,6 +138,25 @@ def test_recent_changes_use_dataset_time_and_comparable_records() -> None:
     assert_grounded(payload, analysis["analysis_id"])
 
 
+def test_selected_risk_context_overrides_ambiguous_ai_route(monkeypatch) -> None:
+    analysis = create_analysis()
+    selected = analysis["risks"][0]
+
+    def ambiguous_router(question, stored_analysis):
+        return qa.QuestionRoute(intent=qa.QuestionIntent.INSUFFICIENT)
+
+    monkeypatch.setattr(qa, "route_with_openai", ambiguous_router)
+    payload = ask(
+        analysis["analysis_id"],
+        "What evidence supports this alert?",
+        risk_id=selected["risk_id"],
+    )
+    assert payload["answer_mode"] == "llm_routed"
+    assert f"support {selected['title']}" in payload["answer"]
+    assert payload["observed_facts"]
+    assert_grounded(payload, analysis["analysis_id"])
+
+
 def test_unknown_zone_returns_insufficient_data_without_invention() -> None:
     analysis = create_analysis()
     payload = ask(analysis["analysis_id"], "Why is Zone Z dangerous?")
@@ -176,6 +195,8 @@ def test_ai_api_failure_falls_back_to_deterministic_grounded_answer(monkeypatch)
     monkeypatch.setattr(qa, "route_with_openai", failed_router)
     payload = ask(analysis["analysis_id"], "Why is Zone B risky?")
     assert payload["answer_mode"] == "deterministic_fallback"
+    assert payload["model_used"] is None
+    assert payload["fallback_reason"] == "ai_not_configured"
     assert "Zone B has 4 detected risk(s)" in payload["answer"]
     assert_grounded(payload, analysis["analysis_id"])
 
@@ -209,6 +230,8 @@ def test_openai_structured_route_is_used_without_generating_facts(monkeypatch) -
     monkeypatch.setattr("openai.OpenAI", FakeOpenAI)
     payload = ask(analysis["analysis_id"], "Tell me about Zone B")
     assert payload["answer_mode"] == "llm_routed"
+    assert payload["model_used"] == "test-model"
+    assert payload["fallback_reason"] is None
     assert "Zone B has 4 detected risk(s)" in payload["answer"]
     assert_grounded(payload, analysis["analysis_id"])
 
@@ -224,6 +247,7 @@ def test_ai_configuration_never_exposes_key(monkeypatch) -> None:
         "configured": True,
         "model": "test-model",
         "base_url": "https://api.openai.com/v1",
+        "role": "grounded_intent_router",
         "fallback_available": True,
     }
     assert "secret-value" not in response.text

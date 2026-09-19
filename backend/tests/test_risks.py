@@ -59,6 +59,21 @@ def test_every_risk_is_explainable_and_score_is_auditable() -> None:
         assert all(item["source_row"] >= 2 for item in risk["observed_data"])
 
 
+def test_environment_risk_explains_worsening_recorded_trend() -> None:
+    risks = upload_sample_shift()["risks"]
+    environment_risk = next(
+        risk for risk in risks if risk["title"] == "Adverse environmental conditions"
+    )
+    assert "recorded trend" in environment_risk["interpretation"]
+    assert "gas_level increased from 4.2 to 12.8" in environment_risk["interpretation"]
+    environment_rows = [
+        evidence
+        for evidence in environment_risk["observed_data"]
+        if evidence["source_file"] == "environment.csv"
+    ]
+    assert len(environment_rows) == 3
+
+
 def test_risk_detail_and_evidence_are_retrievable() -> None:
     payload = upload_sample_shift()
     analysis_id = payload["analysis_id"]

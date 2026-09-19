@@ -350,11 +350,37 @@ def environmental_conditions(
     return conditions
 
 
+def environmental_trends(records: list[NormalizedRecord]) -> tuple[list[str], list[NormalizedRecord]]:
+    if len(records) < 2:
+        return [], []
+    ordered = sorted(records, key=lambda record: (record.timestamp, record.source_row))
+    first, last = ordered[0], ordered[-1]
+    trends: list[str] = []
+    for field, direction in (("gas_level", "increased"), ("temperature", "increased")):
+        first_value = first.values.get(field)
+        last_value = last.values.get(field)
+        if (
+            isinstance(first_value, (int, float))
+            and isinstance(last_value, (int, float))
+            and last_value > first_value
+        ):
+            trends.append(f"{field} {direction} from {first_value:g} to {last_value:g}")
+    first_visibility = first.values.get("visibility")
+    last_visibility = last.values.get("visibility")
+    if (
+        isinstance(first_visibility, (int, float))
+        and isinstance(last_visibility, (int, float))
+        and last_visibility < first_visibility
+    ):
+        trends.append(f"visibility decreased from {first_visibility:g} to {last_visibility:g}")
+    return trends, ordered if trends else []
+
+
 def detect_environment_risks(
     records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds
 ) -> list[Risk]:
     cutoff = dataset_now - timedelta(minutes=thresholds.active_window_minutes)
-    latest_by_zone: dict[str, NormalizedRecord] = {}
+    records_by_zone: dict[str, list[NormalizedRecord]] = {}
     for record in records:
         if (
             record.record_type != "environment"
@@ -362,15 +388,15 @@ def detect_environment_risks(
             or record.timestamp < cutoff
         ):
             continue
-        previous = latest_by_zone.get(record.zone_id)
-        if previous is None or record.timestamp > previous.timestamp:
-            latest_by_zone[record.zone_id] = record
+        records_by_zone.setdefault(record.zone_id, []).append(record)
 
     risks: list[Risk] = []
-    for zone_id, environment in latest_by_zone.items():
+    for zone_id, zone_records in records_by_zone.items():
+        environment = max(zone_records, key=lambda record: (record.timestamp, record.source_row))
         conditions = environmental_conditions(environment, thresholds)
         if not conditions:
             continue
+        trends, trend_records = environmental_trends(zone_records)
         context = records_near(
             records,
             zone_id=zone_id,
@@ -383,6 +409,8 @@ def detect_environment_risks(
             f"{name} {value:g} {operator} configured warning threshold {threshold:g}"
             for name, value, operator, threshold, _ in conditions
         ]
+        if trends:
+            descriptions.append("recorded trend: " + "; ".join(trends))
         source_types = {"environment", *(record.record_type for record in context)}
         entities = affected_from_context(context)
         risks.append(
@@ -392,7 +420,7 @@ def detect_environment_risks(
                 zone_id=zone_id,
                 detected_at=environment.timestamp,
                 entities=entities,
-                records=[environment, *context],
+                records=[environment, *trend_records, *context],
                 interpretation="; ".join(descriptions) + ".",
                 recommended_action=(
                     "Verify the environmental sensor readings, restrict exposure if required by "

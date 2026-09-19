@@ -23,7 +23,7 @@ from app.store.memory import StoredAnalysis, analysis_store
 
 app = FastAPI(
     title="Mine Safety Incident Prevention API",
-    version="0.5.0",
+    version="0.6.0",
     description=(
         "Mine-shift CSV ingestion and deterministic risk analysis API with row-level "
         "validation, evidence provenance, transparent scoring, and prioritized risks."
@@ -81,6 +81,7 @@ def ai_configuration() -> dict[str, str | bool | None]:
         "configured": configured,
         "model": model,
         "base_url": public_base_url,
+        "role": "grounded_intent_router",
         "fallback_available": True,
     }
 

@@ -79,12 +79,19 @@ and `127.0.0.1:5173` are enabled by default for the included frontend.
 The model output is parsed into a strict Pydantic route and rejected if it references an identifier
 that is absent from the uploaded analysis.
 
+Question responses expose `answer_mode`, `model_used`, and a non-sensitive
+`fallback_reason`, allowing the interface to distinguish model-assisted routing from the
+grounded deterministic fallback. Provider errors and credentials are never returned.
+
 ## Frontend integration
 
 Use `docs/frontend-contract.json` in the repository for a stable UI fixture. To test live data,
 send one or more files using the `workers`, `equipment`, `environment`, and `events` multipart
 fields. At least one file is required. The latest valid dataset timestamp is treated as now;
 active entity counts use each entity's latest record within that final 30-minute window.
+
+Every analysis response includes the engine version, analysis timestamp, SHA-256 data
+fingerprint, `uploaded_csv` source-of-truth label, and the exact scoring-threshold snapshot.
 
 ## Priority model
 
@@ -113,12 +120,15 @@ documented prototype assumption.
 
 ## Known limitations
 
-- In-memory analyses are lost when the server restarts.
+- In-memory analyses are lost when the server restarts; the store retains only the latest 25 analyses.
 - The deterministic language router targets the documented English examples and common Chinese terms.
 - The optional model improves intent routing only; it does not replace deterministic analysis.
 - Zone records do not provide exact worker-equipment distance.
 - Sensor and speed units are not defined by the challenge schema.
 - Prototype policy thresholds must be aligned with the actual site's operating standards.
+- Time-only timestamps are accepted when used consistently. If dated and time-only records are
+  mixed, ungrounded time-only rows are excluded instead of inventing calendar dates or comparing
+  incompatible time bases.
 
 ## Test
 

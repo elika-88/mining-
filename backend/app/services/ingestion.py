@@ -204,9 +204,9 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
             warnings=["File is not valid UTF-8 and was skipped."],
         )
 
-    lines = text.splitlines()
     try:
-        header_values = next(csv.reader([lines[0]], strict=True))
+        physical_lines = text.splitlines()
+        header_values = next(csv.reader([physical_lines[0]], strict=True))
         normalized_headers = [normalize_header(header) for header in header_values]
         if any(not header for header in normalized_headers) or len(set(normalized_headers)) != len(normalized_headers):
             raise csv.Error("CSV contains blank or duplicate column names")
@@ -216,16 +216,75 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
             warnings.append(f"Missing expected columns: {', '.join(missing_columns)}.")
 
         seen_rows: set[tuple[tuple[str, str | None], ...]] = set()
-        for row_number, raw_line in enumerate(lines[1:], start=2):
+        line_index = 1
+        while line_index < len(physical_lines):
+            row_number = line_index + 1
+            raw_line = physical_lines[line_index]
             if not raw_line.strip():
+                line_index += 1
+                continue
+            candidate = raw_line
+            try:
+                row_values = next(csv.reader([candidate], strict=True))
+            except csv.Error as error:
+                if "unexpected end of data" not in str(error):
+                    received_records += 1
+                    rejected_records += 1
+                    warnings.append(f"Row {row_number}: malformed CSV ({error}); row was rejected.")
+                    line_index += 1
+                    continue
+                recovered = False
+                while line_index + 1 < len(physical_lines):
+                    next_line = physical_lines[line_index + 1]
+                    try:
+                        independent_values = next(csv.reader([next_line], strict=True))
+                    except csv.Error:
+                        independent_values = []
+                    timestamp_index = (
+                        normalized_headers.index("timestamp")
+                        if "timestamp" in normalized_headers
+                        else None
+                    )
+                    independent_timestamp = (
+                        independent_values[timestamp_index]
+                        if timestamp_index is not None and timestamp_index < len(independent_values)
+                        else None
+                    )
+                    if (
+                        len(independent_values) == len(normalized_headers)
+                        and parse_timestamp(independent_timestamp) is not None
+                    ):
+                        received_records += 1
+                        rejected_records += 1
+                        warnings.append(
+                            f"Row {row_number}: malformed CSV (unclosed quoted field); row was rejected."
+                        )
+                        line_index += 1
+                        recovered = True
+                        break
+                    candidate = f"{candidate}\n{next_line}"
+                    line_index += 1
+                    try:
+                        row_values = next(csv.reader([candidate], strict=True))
+                        recovered = True
+                        break
+                    except csv.Error as continued_error:
+                        if "unexpected end of data" not in str(continued_error):
+                            break
+                if not recovered:
+                    received_records += 1
+                    rejected_records += 1
+                    warnings.append(
+                        f"Row {row_number}: malformed CSV (unclosed quoted field); row was rejected."
+                    )
+                    line_index += 1
+                    continue
+                if len(independent_values) == len(normalized_headers) and candidate == raw_line:
+                    continue
+            line_index += 1
+            if not row_values or all(not clean_value(value) for value in row_values):
                 continue
             received_records += 1
-            try:
-                row_values = next(csv.reader([raw_line], strict=True))
-            except csv.Error as error:
-                rejected_records += 1
-                warnings.append(f"Row {row_number}: malformed CSV ({error}); row was rejected.")
-                continue
             if len(row_values) > len(normalized_headers):
                 rejected_records += 1
                 warnings.append(f"Row {row_number}: too many fields; row was rejected.")
@@ -344,5 +403,39 @@ async def ingest_files(uploads: dict[str, UploadFile | None]) -> IngestionResult
         result.received_records += summary.received_records
         result.rejected_records += summary.rejected_records
         result.warnings.extend(f"{file_type}: {warning}" for warning in summary.warnings)
+    time_only_records = [
+        record for record in result.records if record.values.get("timestamp_date_available") is False
+    ]
+    dated_records = [
+        record for record in result.records if record.values.get("timestamp_date_available") is not False
+    ]
+    if time_only_records and dated_records:
+        ambiguous_ids = {record.evidence_id for record in time_only_records}
+        result.records = [record for record in result.records if record.evidence_id not in ambiguous_ids]
+        result.rejected_records += len(time_only_records)
+        affected_by_type: dict[str, int] = {}
+        for record in time_only_records:
+            affected_by_type[record.record_type] = affected_by_type.get(record.record_type, 0) + 1
+        updated_files: list[FileProcessingSummary] = []
+        for summary in result.files:
+            rejected_for_mixed_basis = affected_by_type.get(summary.file_type, 0)
+            if not rejected_for_mixed_basis:
+                updated_files.append(summary)
+                continue
+            warning = (
+                f"{rejected_for_mixed_basis} time-only record(s) were excluded because the same "
+                "analysis also contains dated timestamps; their calendar date cannot be grounded."
+            )
+            updated_files.append(
+                summary.model_copy(
+                    update={
+                        "valid_records": summary.valid_records - rejected_for_mixed_basis,
+                        "rejected_records": summary.rejected_records + rejected_for_mixed_basis,
+                        "warnings": [*summary.warnings, warning],
+                    }
+                )
+            )
+            result.warnings.append(f"{summary.file_type}: {warning}")
+        result.files = updated_files
     result.warnings = list(dict.fromkeys(result.warnings))
     return result

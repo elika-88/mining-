@@ -1,9 +1,17 @@
-from datetime import timedelta
+import hashlib
+from dataclasses import asdict
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.core.config import THRESHOLDS
 from app.models.normalized import NormalizedRecord
-from app.models.responses import AnalysisResponse, Overview, Priority, ProcessingSummary
+from app.models.responses import (
+    AnalysisMetadata,
+    AnalysisResponse,
+    Overview,
+    Priority,
+    ProcessingSummary,
+)
 from app.services.ingestion import IngestionResult
 from app.services.risk_engine import detect_risks
 
@@ -15,6 +23,7 @@ INACTIVE_EQUIPMENT_STATUSES = {
     "out of service",
     "maintenance",
 }
+ENGINE_VERSION = "0.6.0"
 
 
 def latest_entity_records(records: list[NormalizedRecord], record_type: str) -> dict[str, NormalizedRecord]:
@@ -79,4 +88,20 @@ def build_analysis(ingestion: IngestionResult) -> tuple[AnalysisResponse, list[N
         processing_summary=summary,
         files=ingestion.files,
     )
-    return AnalysisResponse(analysis_id=analysis_id, overview=overview, risks=risks), ingestion.records
+    fingerprint_material = "|".join(sorted(record.evidence_id for record in ingestion.records))
+    metadata = AnalysisMetadata(
+        engine_version=ENGINE_VERSION,
+        analyzed_at=datetime.now(timezone.utc),
+        source_of_truth="uploaded_csv",
+        data_fingerprint=hashlib.sha256(fingerprint_material.encode("utf-8")).hexdigest(),
+        thresholds=asdict(THRESHOLDS),
+    )
+    return (
+        AnalysisResponse(
+            analysis_id=analysis_id,
+            overview=overview,
+            risks=risks,
+            metadata=metadata,
+        ),
+        ingestion.records,
+    )

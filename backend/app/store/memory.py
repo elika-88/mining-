@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from dataclasses import dataclass
 
 from app.models.normalized import NormalizedRecord
@@ -12,8 +13,9 @@ class StoredAnalysis:
 
 
 class AnalysisStore:
-    def __init__(self) -> None:
-        self._analyses: dict[str, StoredAnalysis] = {}
+    def __init__(self, max_analyses: int = 25) -> None:
+        self._analyses: OrderedDict[str, StoredAnalysis] = OrderedDict()
+        self._max_analyses = max_analyses
 
     def save(self, response: AnalysisResponse, records: list[NormalizedRecord]) -> None:
         evidence = {
@@ -33,6 +35,9 @@ class AnalysisStore:
             records=tuple(records),
             evidence=evidence,
         )
+        self._analyses.move_to_end(response.analysis_id)
+        while len(self._analyses) > self._max_analyses:
+            self._analyses.popitem(last=False)
 
     def get(self, analysis_id: str) -> StoredAnalysis | None:
         return self._analyses.get(analysis_id)

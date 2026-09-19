@@ -117,5 +117,22 @@
         "magnitude": 7
       }
     }
-  ]
+  ],
+  "metadata": {
+    "engine_version": "0.6.0",
+    "analyzed_at": "2026-09-19T15:31:00Z",
+    "source_of_truth": "uploaded_csv",
+    "data_fingerprint": "63c01c327593cdd5637f15415250abb0f0bd694a2b5b6f4b6337568914eae11a",
+    "thresholds": {
+      "gas_warning": 10.0,
+      "gas_critical": 20.0,
+      "temperature_warning": 40.0,
+      "temperature_critical": 50.0,
+      "visibility_warning": 30.0,
+      "visibility_critical": 10.0,
+      "co_presence_minutes": 5.0,
+      "context_minutes": 10.0,
+      "active_window_minutes": 30.0
+    }
+  }
 }

@@ -88,6 +88,14 @@ class Overview(ApiModel):
     files: list[FileProcessingSummary] = Field(default_factory=list)
 
 
+class AnalysisMetadata(ApiModel):
+    engine_version: str
+    analyzed_at: datetime
+    source_of_truth: str
+    data_fingerprint: str
+    thresholds: dict[str, float]
+
+
 class GroundedFact(ApiModel):
     statement: str
     evidence_ids: list[str]
@@ -97,6 +105,8 @@ class QuestionAnswer(ApiModel):
     question: str
     answer: str
     answer_mode: str
+    model_used: str | None = None
+    fallback_reason: str | None = None
     observed_facts: list[GroundedFact]
     interpretation: str | None
     recommended_action: str | None
@@ -107,6 +117,7 @@ class AnalysisResponse(ApiModel):
     analysis_id: str
     overview: Overview
     risks: list[Risk]
+    metadata: AnalysisMetadata
 
 
 class QuestionRequest(ApiModel):
