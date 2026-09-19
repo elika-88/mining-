@@ -23,7 +23,16 @@ const translations = {
     languageNotice: "Interface labels are translated. Backend risk and answer text is shown in the language returned by the API.",
     score: "Score", clearEntityFilter: "Clear entity filter", filteringEntity: "Related to {entity}", evidenceUnavailable: "Evidence details unavailable",
     asking: "Asking...", selected: "Selected", scoreBreakdown: "Score breakdown",
-    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — or click to browse", dropActive: "Release to add CSV files"
+    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — or click to browse", dropActive: "Release to add CSV files",
+    clearFiles: "Clear all", removeFile: "Remove", replaceFile: "Replace", fileSelected: "Selected", fileMissing: "Missing",
+    fileReplaced: "{name} replaced", incompleteCoverage: "Data coverage is incomplete; analysis may be limited.", fileTooLarge: "{name} exceeds the 10 MB limit.",
+    nonCsvFile: "{name} is not a CSV file.", emptyFile: "Empty file", apiDisconnectedHelp: "Backend unavailable — start run.ps1 and retry.",
+    backendTimeout: "Backend request timed out — retry or inspect the backend console.", noValidRecords: "No valid records — inspect rejected rows in Data Quality.",
+    noRiskCaution: "No detected risks — this does not prove the shift is safe.", aiChecking: "Checking AI", aiConnected: "AI connected", aiFallback: "AI fallback",
+    aiModel: "Model", aiRouted: "AI-routed", deterministicFallback: "Deterministic fallback", insufficientData: "Insufficient data",
+    aiFallbackNotice: "AI provider unavailable; grounded fallback used.", printReport: "Print / Save PDF", exportJson: "Export JSON",
+    timelineTitle: "Evidence timeline", timelineNotice: "Shows only observed records returned by the analysis; no movement path is inferred.", recentThirty: "Last 30 minutes",
+    noTimeline: "No observed records are available for the current filters.", qualityContractNote: "The current API exposes file-level warnings; rejected row details are not available to the frontend."
   },
   kk: {
     appTitle: "MineShift қауіпсіздік басқару панелі", awaitingShift: "Ауысым деректері күтілуде", filesReady: "{count} файл дайын",
@@ -49,7 +58,16 @@ const translations = {
     languageNotice: "Интерфейс аударылады. Қауіп пен жауап мәтіні API қайтарған тілде көрсетіледі.",
     score: "Ұпай", clearEntityFilter: "Нысан сүзгісін тазалау", filteringEntity: "{entity} бойынша", evidenceUnavailable: "Дәлел деректері қолжетімсіз",
     asking: "Сұрау жіберілуде...", selected: "Таңдалды", scoreBreakdown: "Балл құрамы",
-    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — немесе таңдау үшін басыңыз", dropActive: "CSV файлдарын қосу үшін жіберіңіз"
+    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — немесе таңдау үшін басыңыз", dropActive: "CSV файлдарын қосу үшін жіберіңіз",
+    clearFiles: "Барлығын тазалау", removeFile: "Жою", replaceFile: "Ауыстыру", fileSelected: "Таңдалды", fileMissing: "Жоқ",
+    fileReplaced: "{name} ауыстырылды", incompleteCoverage: "Деректер толық емес; талдау шектеулі болуы мүмкін.", fileTooLarge: "{name} 10 МБ шегінен асады.",
+    nonCsvFile: "{name} CSV файлы емес.", emptyFile: "Бос файл", apiDisconnectedHelp: "Сервер қолжетімсіз — run.ps1 іске қосып, қайталаңыз.",
+    backendTimeout: "Сервер сұрауының уақыты аяқталды — қайта көріңіз.", noValidRecords: "Жарамды жазба жоқ — Data Quality бөлімін тексеріңіз.",
+    noRiskCaution: "Қауіп анықталмады — бұл ауысым толық қауіпсіз екенін дәлелдемейді.", aiChecking: "AI тексерілуде", aiConnected: "AI қосылды", aiFallback: "AI резервтік режимде",
+    aiModel: "Модель", aiRouted: "AI бағыттады", deterministicFallback: "Детерминирленген резерв", insufficientData: "Дерек жеткіліксіз",
+    aiFallbackNotice: "AI провайдері қолжетімсіз; деректерге негізделген резерв қолданылды.", printReport: "Басып шығару / PDF", exportJson: "JSON экспорттау",
+    timelineTitle: "Дәлелдер уақыт сызығы", timelineNotice: "Тек талдаудан қайтарылған нақты жазбалар көрсетіледі; қозғалыс жолы болжанбайды.", recentThirty: "Соңғы 30 минут",
+    noTimeline: "Ағымдағы сүзгілер үшін бақылау жазбалары жоқ.", qualityContractNote: "API файл деңгейіндегі ескертулерді ғана береді; қабылданбаған жол деректері фронтендке берілмейді."
   },
   ru: {
     appTitle: "MineShift — консоль безопасности", awaitingShift: "Ожидание данных смены", filesReady: "Файлов готово: {count}",
@@ -75,7 +93,16 @@ const translations = {
     languageNotice: "Интерфейс переведён. Тексты рисков и ответов показываются на языке, возвращённом API.",
     score: "Оценка", clearEntityFilter: "Сбросить фильтр объекта", filteringEntity: "Связано с {entity}", evidenceUnavailable: "Детали доказательства недоступны",
     asking: "Отправка вопроса...", selected: "Выбрано", scoreBreakdown: "Состав оценки",
-    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — или нажмите для выбора", dropActive: "Отпустите, чтобы добавить CSV"
+    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — или нажмите для выбора", dropActive: "Отпустите, чтобы добавить CSV",
+    clearFiles: "Очистить всё", removeFile: "Удалить", replaceFile: "Заменить", fileSelected: "Выбран", fileMissing: "Отсутствует",
+    fileReplaced: "{name} заменён", incompleteCoverage: "Покрытие данных неполное; анализ может быть ограничен.", fileTooLarge: "{name} превышает лимит 10 МБ.",
+    nonCsvFile: "{name} не является CSV-файлом.", emptyFile: "Пустой файл", apiDisconnectedHelp: "Backend недоступен — запустите run.ps1 и повторите.",
+    backendTimeout: "Истекло время ожидания backend — повторите запрос.", noValidRecords: "Нет корректных записей — проверьте Data Quality.",
+    noRiskCaution: "Риски не обнаружены — это не доказывает безопасность смены.", aiChecking: "Проверка AI", aiConnected: "AI подключён", aiFallback: "AI fallback",
+    aiModel: "Модель", aiRouted: "AI-routed", deterministicFallback: "Детерминированный fallback", insufficientData: "Недостаточно данных",
+    aiFallbackNotice: "AI provider недоступен; использован grounded fallback.", printReport: "Печать / Сохранить PDF", exportJson: "Экспорт JSON",
+    timelineTitle: "Хронология доказательств", timelineNotice: "Показаны только фактические записи анализа; траектория движения не моделируется.", recentThirty: "Последние 30 минут",
+    noTimeline: "Для текущих фильтров нет наблюдаемых записей.", qualityContractNote: "API передаёт предупреждения на уровне файлов; детали отклонённых строк недоступны фронтенду."
   },
   zh: {
     appTitle: "MineShift 矿山安全调度控制台", awaitingShift: "等待导入班次数据", filesReady: "已选择 {count} 个文件",
@@ -101,20 +128,36 @@ const translations = {
     languageNotice: "界面标签支持翻译；风险标题、解释和建议保持后端 API 返回的语言。",
     score: "评分", clearEntityFilter: "清除实体筛选", filteringEntity: "仅显示与 {entity} 相关", evidenceUnavailable: "无法获取证据详情",
     asking: "正在提问...", selected: "已选择", scoreBreakdown: "风险评分构成",
-    dropHint: "workers.csv、equipment.csv、environment.csv、events.csv，也可以点击选择", dropActive: "松开即可添加 CSV 文件"
+    dropHint: "workers.csv、equipment.csv、environment.csv、events.csv，也可以点击选择", dropActive: "松开即可添加 CSV 文件",
+    clearFiles: "清空全部", removeFile: "删除", replaceFile: "替换", fileSelected: "已选择", fileMissing: "缺失",
+    fileReplaced: "已替换 {name}", incompleteCoverage: "数据覆盖不完整，分析结果可能有限。", fileTooLarge: "{name} 超过 10 MB 限制。",
+    nonCsvFile: "{name} 不是 CSV 文件。", emptyFile: "空文件", apiDisconnectedHelp: "后端不可用——请启动 run.ps1 后重试。",
+    backendTimeout: "后端请求超时——请重试或检查后端控制台。", noValidRecords: "没有有效记录——请在数据质量面板检查被拒绝的行。",
+    noRiskCaution: "未检测到风险——这并不能证明当前班次绝对安全。", aiChecking: "正在检查 AI", aiConnected: "AI 已连接", aiFallback: "AI 降级模式",
+    aiModel: "模型", aiRouted: "AI 路由", deterministicFallback: "确定性降级", insufficientData: "数据不足",
+    aiFallbackNotice: "AI 提供商不可用，已使用基于数据的降级回答。", printReport: "打印 / 保存为 PDF", exportJson: "导出 JSON",
+    timelineTitle: "证据时间线", timelineNotice: "仅显示分析返回的真实观测记录，不推测人员或设备移动轨迹。", recentThirty: "最近 30 分钟",
+    noTimeline: "当前筛选条件下没有观测记录。", qualityContractNote: "当前 API 仅提供文件级警告；前端无法获得被拒绝行的结构化详情。"
   }
 };
 
 const apiBase = window.MINE_API_BASE || ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : location.origin);
 const supportedFiles = new Set(["workers.csv", "equipment.csv", "environment.csv", "events.csv"]);
-let currentLanguage = "en";
+const maxFileBytes = 10 * 1024 * 1024;
+const preferenceKey = "mine-safety-ui-preferences";
+const storedPreferences = loadPreferences();
+let currentLanguage = ["en", "kk", "ru", "zh"].includes(storedPreferences.language) ? storedPreferences.language : "en";
 let selectedFiles = new Map();
 let currentAnalysis = null;
 let selectedRiskId = null;
-let priorityFilter = "all";
-let zoneFilter = "all";
+let priorityFilter = ["all", "high", "medium", "low"].includes(storedPreferences.priorityFilter) ? storedPreferences.priorityFilter : "all";
+let zoneFilter = storedPreferences.zoneFilter || "all";
 let entityFilter = null;
 let apiConnected = null;
+let aiConfig = null;
+let riskThresholds = null;
+let replaceTarget = null;
+let isAnalyzing = false;
 
 function text(key, values = {}) {
   let value = translations[currentLanguage][key] || translations.en[key] || key;
@@ -122,6 +165,23 @@ function text(key, values = {}) {
     value = value.replace(`{${name}}`, String(replacement));
   });
   return value;
+}
+
+function loadPreferences() {
+  try {
+    return JSON.parse(localStorage.getItem(preferenceKey) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function savePreferences() {
+  localStorage.setItem(preferenceKey, JSON.stringify({
+    language: currentLanguage,
+    priorityFilter,
+    zoneFilter,
+    qualityOpen: document.getElementById("dataQualityPanel")?.open || false
+  }));
 }
 
 function apiUrl(path) {
@@ -132,13 +192,22 @@ async function checkApiStatus() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 2500);
   try {
-    const response = await fetch(apiUrl("/api/health"), { signal: controller.signal });
-    apiConnected = response.ok;
+    const [healthResponse, aiResponse, thresholdsResponse] = await Promise.all([
+      fetch(apiUrl("/api/health"), { signal: controller.signal }),
+      fetch(apiUrl("/api/config/ai"), { signal: controller.signal }),
+      fetch(apiUrl("/api/config/risk-thresholds"), { signal: controller.signal })
+    ]);
+    apiConnected = healthResponse.ok;
+    aiConfig = aiResponse.ok ? await aiResponse.json() : null;
+    riskThresholds = thresholdsResponse.ok ? await thresholdsResponse.json() : null;
   } catch {
     apiConnected = false;
+    aiConfig = null;
+    riskThresholds = null;
   } finally {
     clearTimeout(timeout);
     updateApiStatus();
+    updateAiStatus();
   }
 }
 
@@ -155,6 +224,22 @@ function updateApiStatus() {
     : "min-w-[112px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100";
 }
 
+function updateAiStatus() {
+  const status = document.getElementById("aiStatus");
+  if (apiConnected === null) {
+    status.textContent = text("aiChecking");
+    status.className = "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-subtext border border-line";
+    return;
+  }
+  const connected = Boolean(apiConnected && aiConfig?.configured);
+  const model = aiConfig?.model ? ` · ${aiConfig.model}` : "";
+  status.textContent = connected ? `${text("aiConnected")}${model}` : `${text("aiFallback")}${model}`;
+  status.title = aiConfig?.model ? `${text("aiModel")}: ${aiConfig.model}` : text("aiFallbackNotice");
+  status.className = connected
+    ? "ai-connected min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium"
+    : "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100";
+}
+
 function changeLanguage(language) {
   const scrollPosition = window.scrollY;
   currentLanguage = language;
@@ -167,8 +252,10 @@ function changeLanguage(language) {
   document.getElementById("queryInput").placeholder = text("inputPlaceholder");
   updateShiftIndicator();
   updateApiStatus();
+  updateAiStatus();
   renderFileStatus();
   renderAnalysis();
+  savePreferences();
   requestAnimationFrame(() => window.scrollTo(0, scrollPosition));
 }
 
@@ -186,6 +273,9 @@ function updateShiftIndicator() {
 function showMessage(message, sources = "") {
   document.getElementById("answerQuestion").textContent = text("appTitle");
   document.getElementById("answerContent").textContent = message;
+  const answerMode = document.getElementById("answerMode");
+  answerMode.textContent = text("insufficientData");
+  answerMode.className = "rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[11px] text-amber-800 font-medium";
   const evidenceList = document.getElementById("answerEvidenceList");
   evidenceList.replaceChildren();
   if (sources) renderAnswerEvidenceEmpty(evidenceList, sources);
@@ -193,23 +283,35 @@ function showMessage(message, sources = "") {
 }
 
 function handleFilesUpload(event) {
-  selectFiles(event.target.files, true);
+  selectFiles(event.target.files);
   event.target.value = "";
 }
 
 function selectFiles(files, replace = false) {
   const nextFiles = replace ? new Map() : new Map(selectedFiles);
+  const feedback = [];
   for (const file of files) {
     const normalizedName = file.name.toLowerCase();
-    if (!supportedFiles.has(normalizedName)) {
-      showMessage(text("unknownFileError", { name: file.name }));
+    if (!normalizedName.endsWith(".csv") || (file.type && !["text/csv", "application/vnd.ms-excel"].includes(file.type))) {
+      feedback.push(text("nonCsvFile", { name: file.name }));
       continue;
     }
-    nextFiles.set(normalizedName.replace(".csv", ""), file);
+    if (!supportedFiles.has(normalizedName)) {
+      feedback.push(text("unknownFileError", { name: file.name }));
+      continue;
+    }
+    if (file.size > maxFileBytes) {
+      feedback.push(text("fileTooLarge", { name: file.name }));
+      continue;
+    }
+    const field = normalizedName.replace(".csv", "");
+    if (nextFiles.has(field)) feedback.push(text("fileReplaced", { name: file.name }));
+    nextFiles.set(field, file);
   }
   selectedFiles = nextFiles;
   updateShiftIndicator();
   renderFileStatus();
+  if (feedback.length) showFileFeedback(feedback.join(" · "), true);
 }
 
 function renderFileStatus() {
@@ -217,13 +319,31 @@ function renderFileStatus() {
   const missing = [...supportedFiles].filter((fileName) => !selectedFiles.has(fileName.replace(".csv", "")));
   list.replaceChildren();
   [...supportedFiles].forEach((fileName) => {
-    const selected = selectedFiles.get(fileName.replace(".csv", ""));
-    const item = document.createElement("span");
+    const field = fileName.replace(".csv", "");
+    const selected = selectedFiles.get(field);
+    const item = document.createElement("article");
     item.className = selected
-      ? "rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-emerald-700 font-medium"
-      : "rounded-full border border-line bg-subtle px-3 py-1 text-subtext";
-    item.textContent = selected ? selected.name : fileName;
-    item.title = selected ? `${selected.name} · ${formatBytes(selected.size)}` : fileName;
+      ? "rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-emerald-800"
+      : "rounded-xl border border-line bg-subtle/70 p-3 text-subtext";
+    const heading = document.createElement("div");
+    heading.className = "font-medium text-heavy truncate";
+    heading.textContent = selected ? selected.name : fileName;
+    heading.title = heading.textContent;
+    const meta = document.createElement("div");
+    meta.className = "mt-1 text-[11px]";
+    meta.textContent = selected
+      ? `${field} · ${formatBytes(selected.size)} · ${selected.size ? text("fileSelected") : text("emptyFile")}`
+      : `${field} · ${text("fileMissing")}`;
+    item.append(heading, meta);
+    if (selected) {
+      const actions = document.createElement("div");
+      actions.className = "mt-3 flex gap-2";
+      actions.append(
+        createFileAction(text("replaceFile"), () => beginReplaceFile(field)),
+        createFileAction(text("removeFile"), () => removeFile(field), true)
+      );
+      item.appendChild(actions);
+    }
     list.appendChild(item);
   });
   const missingText = document.getElementById("missingFileList");
@@ -232,20 +352,64 @@ function renderFileStatus() {
     missingText.textContent = text("missingFiles", { files: missing.join(", ") });
     badge.textContent = String(missing.length);
     badge.classList.remove("hidden");
+    showFileFeedback(text("incompleteCoverage"));
   } else {
     missingText.textContent = text("allFilesReady");
     badge.classList.add("hidden");
+    showFileFeedback("");
   }
+  document.getElementById("clearFilesButton").classList.toggle("hidden", selectedFiles.size === 0);
+  document.getElementById("rerunBtn").disabled = selectedFiles.size === 0 || isAnalyzing;
+}
+
+function createFileAction(label, handler, destructive = false) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `focus-ring rounded-lg border px-2.5 py-1 text-[11px] font-medium ${destructive ? "border-rose-100 bg-white text-rose-700" : "border-line bg-white text-heavy"}`;
+  button.textContent = label;
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handler();
+  });
+  return button;
+}
+
+function removeFile(field) {
+  selectedFiles.delete(field);
+  renderFileStatus();
+  updateShiftIndicator();
+}
+
+function beginReplaceFile(field) {
+  replaceTarget = field;
+  document.getElementById("replaceFileInput").click();
+}
+
+function clearFiles() {
+  selectedFiles.clear();
+  currentAnalysis = null;
+  selectedRiskId = null;
+  renderFileStatus();
+  renderAnalysis();
+  updateShiftIndicator();
+}
+
+function showFileFeedback(message, isError = false) {
+  const notice = document.getElementById("fileCoverageNotice");
+  notice.textContent = message;
+  notice.classList.toggle("hidden", !message);
+  notice.className = `${message ? "mt-2 rounded-lg px-3 py-2 text-xs" : "hidden"} ${isError ? "bg-rose-50 text-rose-700" : "bg-amber-50 text-amber-800"}`;
 }
 
 async function triggerAnalyze() {
-  if (!selectedFiles.size) {
+  if (!selectedFiles.size || isAnalyzing) {
     showMessage(text("selectFilesError"));
     return;
   }
   const buttonText = document.getElementById("rerunText");
   const button = document.getElementById("rerunBtn");
   const spinner = document.getElementById("analysisSpinner");
+  isAnalyzing = true;
   button.disabled = true;
   button.classList.add("opacity-60", "cursor-wait");
   spinner.classList.remove("hidden");
@@ -253,8 +417,10 @@ async function triggerAnalyze() {
   document.getElementById("workspace").setAttribute("aria-busy", "true");
   const formData = new FormData();
   selectedFiles.forEach((file, field) => formData.append(field, file, file.name));
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
   try {
-    const response = await fetch(apiUrl("/api/analyses"), { method: "POST", body: formData });
+    const response = await fetch(apiUrl("/api/analyses"), { method: "POST", body: formData, signal: controller.signal });
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(payload?.detail || `${response.status} ${response.statusText}`);
     currentAnalysis = payload;
@@ -269,15 +435,23 @@ async function triggerAnalyze() {
   } catch (error) {
     apiConnected = false;
     updateApiStatus();
-    showMessage(text("requestError", { message: error.message }));
+    showMessage(classifyRequestError(error));
   } finally {
-    button.disabled = false;
+    clearTimeout(timeout);
+    isAnalyzing = false;
+    button.disabled = selectedFiles.size === 0;
     button.classList.remove("opacity-60", "cursor-wait");
     spinner.classList.add("hidden");
     buttonText.textContent = text("runBtn");
     document.getElementById("workspace").setAttribute("aria-busy", "false");
     updateShiftIndicator();
   }
+}
+
+function classifyRequestError(error) {
+  if (error?.name === "AbortError") return text("backendTimeout");
+  if (error instanceof TypeError || /failed to fetch|network/i.test(error?.message || "")) return text("apiDisconnectedHelp");
+  return text("requestError", { message: error?.message || "Unknown error" });
 }
 
 function renderAnalysis() {
@@ -294,6 +468,10 @@ function renderAnalysis() {
   renderZoneFilters();
   renderRiskCards();
   renderSelectedRisk();
+  renderTimeline();
+  if (overview && overview.processing_summary.valid_records === 0) {
+    showMessage(text("noValidRecords"));
+  }
 }
 
 function renderPriorityCounts() {
@@ -314,7 +492,7 @@ function renderDataQuality() {
   if (!overview) {
     summary.textContent = text("qualityWaiting");
     badge.classList.add("hidden");
-    panel.open = false;
+    panel.open = Boolean(storedPreferences.qualityOpen);
     return;
   }
   const processing = overview?.processing_summary;
@@ -329,19 +507,41 @@ function renderDataQuality() {
     panel.open = true;
   } else {
     badge.classList.add("hidden");
+    panel.open = Boolean(storedPreferences.qualityOpen);
   }
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "overflow-x-auto rounded-xl border border-line";
+  const table = document.createElement("table");
+  table.className = "w-full text-left text-xs";
+  table.innerHTML = "<thead class=\"bg-subtle text-subtext\"><tr><th class=\"px-3 py-2 font-medium\">File</th><th class=\"px-3 py-2 font-medium\">Received</th><th class=\"px-3 py-2 font-medium\">Valid</th><th class=\"px-3 py-2 font-medium\">Rejected</th><th class=\"px-3 py-2 font-medium\">Status</th></tr></thead>";
+  const body = document.createElement("tbody");
   overview.files.forEach((file) => {
-    const item = document.createElement("div");
-    item.className = "grid grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-xl bg-subtle/60 px-3.5 py-3 text-xs";
-    item.innerHTML = `<div class="min-w-0"><div class="font-medium text-heavy truncate">${escapeHtml(file.source_file || file.file_type)}</div><div class="text-subtext mt-1">${escapeHtml(file.warnings.join(" · ") || "—")}</div></div><div class="font-mono text-right text-subtext">${file.valid_records}/${file.received_records}<br><span class="${file.rejected_records ? "text-rose-700" : ""}">-${file.rejected_records}</span></div>`;
-    details.appendChild(item);
+    const row = document.createElement("tr");
+    row.className = "border-t border-line text-heavy";
+    const status = file.rejected_records || file.warnings.length ? "Warning" : "Valid";
+    row.innerHTML = `<td class="px-3 py-2 font-medium">${escapeHtml(file.source_file || file.file_type)}</td><td class="px-3 py-2 font-mono">${file.received_records}</td><td class="px-3 py-2 font-mono">${file.valid_records}</td><td class="px-3 py-2 font-mono ${file.rejected_records ? "text-rose-700" : ""}">${file.rejected_records}</td><td class="px-3 py-2"><span class="rounded-full px-2 py-0.5 ${status === "Warning" ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"}">${status}</span></td>`;
+    body.appendChild(row);
+    if (file.warnings.length) {
+      const warningRow = document.createElement("tr");
+      warningRow.className = "border-t border-line";
+      warningRow.innerHTML = `<td colspan="5" class="px-3 py-2"><details><summary class="focus-ring cursor-pointer text-xs font-medium text-amber-800">${file.warnings.length} warning(s)</summary><div class="mt-2 grid gap-1 text-xs text-subtext">${file.warnings.map((warning) => `<div>${escapeHtml(warning)}</div>`).join("")}</div></details></td>`;
+      body.appendChild(warningRow);
+    }
   });
+  table.appendChild(body);
+  tableWrap.appendChild(table);
+  details.appendChild(tableWrap);
+  const contractNote = document.createElement("p");
+  contractNote.className = "text-[11px] text-subtext";
+  contractNote.textContent = text("qualityContractNote");
+  details.appendChild(contractNote);
 }
 
 function renderZoneFilters() {
   const container = document.getElementById("zoneFiltersContainer");
   container.replaceChildren();
   const zones = [...new Set((currentAnalysis?.risks || []).map((risk) => risk.zone_id).filter(Boolean))];
+  if (currentAnalysis && zoneFilter !== "all" && !zones.includes(zoneFilter)) zoneFilter = "all";
   [["all", text("allSectors")], ...zones.map((zone) => [zone, zone])].forEach(([value, label]) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -419,6 +619,7 @@ function renderActiveEntityFilter() {
   container.querySelector("button").addEventListener("click", () => {
     entityFilter = null;
     renderRiskCards();
+    renderTimeline();
   });
 }
 
@@ -437,9 +638,9 @@ function renderSelectedRisk() {
     content.classList.add("hidden");
     empty.classList.remove("hidden");
     empty.querySelector("h3").textContent = currentAnalysis ? text("noRisksTitle") : text("noDataTitle");
-    empty.querySelector("p").textContent = currentAnalysis ? text("noRisksDesc") : text("noDataDesc");
+    empty.querySelector("p").textContent = currentAnalysis ? text("noRiskCaution") : text("noDataDesc");
     document.getElementById("detailEntities").replaceChildren();
-    document.getElementById("exportButton").classList.add("hidden");
+    document.getElementById("reportActions").classList.add("hidden");
     return;
   }
   empty.classList.add("hidden");
@@ -462,14 +663,23 @@ function renderSelectedRisk() {
     button.addEventListener("click", () => {
       entityFilter = entity.id;
       renderRiskCards();
+      renderTimeline();
     });
     entities.appendChild(button);
   });
   document.getElementById("detailAction").textContent = risk.recommended_action;
   document.getElementById("detailReasoning").textContent = risk.interpretation;
-  const exportButton = document.getElementById("exportButton");
-  exportButton.classList.remove("hidden");
-  exportButton.onclick = () => exportRiskReport(risk);
+  const limitations = document.getElementById("detailLimitations");
+  limitations.replaceChildren();
+  (risk.limitations.length ? risk.limitations : [text("insufficientEvidence")]).forEach((limitation) => {
+    const item = document.createElement("div");
+    item.textContent = limitation;
+    limitations.appendChild(item);
+  });
+  const reportActions = document.getElementById("reportActions");
+  reportActions.classList.remove("hidden");
+  document.getElementById("printButton").onclick = () => printRiskReport(risk);
+  document.getElementById("jsonExportButton").onclick = () => exportRiskJson(risk);
   renderScoreBreakdown(risk.score_breakdown);
   renderEvidence(risk);
 }
@@ -497,21 +707,20 @@ function renderEvidence(risk) {
     const row = document.createElement("div");
     row.className = "p-3.5 bg-subtle/70 rounded-xl text-xs";
     const facts = Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · ");
-    row.innerHTML = `<div class="flex items-start justify-between gap-4"><div class="min-w-0"><div class="font-medium text-heavy break-words">${escapeHtml(facts)}</div><div class="font-mono text-[11px] text-subtext mt-1">${formatDateTime(evidence.timestamp)} · ${escapeHtml(evidence.zone_id || "—")} · ${text("row")} ${evidence.source_row}</div></div><span class="shrink-0 font-mono text-[11px] text-subtext bg-surface px-2.5 py-0.5 rounded-md border border-line">${escapeHtml(evidence.source_file)}</span></div>`;
+    const issues = evidence.validation_issues?.length
+      ? `<div class="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-amber-800">${escapeHtml(evidence.validation_issues.join(" · "))}</div>`
+      : "";
+    row.innerHTML = `<div class="flex items-start justify-between gap-4"><div class="min-w-0"><div class="font-medium text-heavy break-words">${escapeHtml(facts)}</div><div class="font-mono text-[11px] text-subtext mt-1">${formatDateTime(evidence.timestamp)} · ${escapeHtml(evidence.zone_id || "—")} · ${text("row")} ${evidence.source_row}</div>${issues}</div><span class="shrink-0 font-mono text-[11px] text-subtext bg-surface px-2.5 py-0.5 rounded-md border border-line">${escapeHtml(evidence.source_file)}</span></div>`;
     list.appendChild(row);
   });
-  if (risk.limitations.length) {
-    const limitations = document.createElement("div");
-    limitations.className = "p-3.5 border border-dashed border-line rounded-xl text-xs text-subtext";
-    limitations.textContent = `${text("limitations")}: ${risk.limitations.join(" · ")}`;
-    list.appendChild(limitations);
-  }
 }
 
 function setFilterPriority(priority) {
   priorityFilter = priority;
+  savePreferences();
   updatePriorityFilterState();
   renderRiskCards();
+  renderTimeline();
 }
 
 function updatePriorityFilterState() {
@@ -526,8 +735,10 @@ function updatePriorityFilterState() {
 
 function setFilterZone(zone) {
   zoneFilter = zone;
+  savePreferences();
   renderZoneFilters();
   renderRiskCards();
+  renderTimeline();
 }
 
 function askQuestion(question) {
@@ -552,14 +763,18 @@ async function submitCustomQuery() {
   const queryButton = document.getElementById("queryButton");
   const querySpinner = document.getElementById("querySpinner");
   const queryButtonText = document.getElementById("queryButtonText");
+  const answerMode = document.getElementById("answerMode");
   document.getElementById("answerQuestion").textContent = question;
   answerContent.textContent = text("asking");
+  answerMode.textContent = text("asking");
   answerEvidenceList.replaceChildren();
   answerBox.classList.remove("hidden");
   queryButton.disabled = true;
   querySpinner.classList.remove("hidden");
   queryButtonText.classList.add("hidden");
   document.getElementById("queryInput").disabled = true;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 45000);
   try {
     const requestPayload = { question };
     const selectedRiskReference = /this (?:alert|risk)|selected (?:alert|risk)|这个(?:告警|风险)|该(?:告警|风险)|этот риск|это предупреждение|осы қауіп/i;
@@ -569,25 +784,42 @@ async function submitCustomQuery() {
     const response = await fetch(apiUrl(`/api/analyses/${encodeURIComponent(currentAnalysis.analysis_id)}/questions`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestPayload)
+      body: JSON.stringify(requestPayload),
+      signal: controller.signal
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(payload?.detail || `${response.status} ${response.statusText}`);
     apiConnected = true;
     updateApiStatus();
     const sections = [payload.answer, payload.interpretation, payload.recommended_action].filter(Boolean);
+    const mode = answerModePresentation(payload);
+    answerMode.textContent = mode.label;
+    answerMode.className = mode.classes;
+    if (payload.answer_mode === "deterministic_fallback" && aiConfig?.configured) sections.push(text("aiFallbackNotice"));
     if (payload.limitations?.length) sections.push(`${text("limitations")}: ${payload.limitations.join(" · ")}`);
     answerContent.textContent = sections.join("\n\n");
     await renderQuestionEvidence(payload.observed_facts || []);
   } catch (error) {
-    answerContent.textContent = text("requestError", { message: error.message });
+    answerMode.textContent = text("insufficientData");
+    answerContent.textContent = classifyRequestError(error);
     renderAnswerEvidenceEmpty(answerEvidenceList, text("evidenceUnavailable"));
   } finally {
+    clearTimeout(timeout);
     queryButton.disabled = false;
     querySpinner.classList.add("hidden");
     queryButtonText.classList.remove("hidden");
     document.getElementById("queryInput").disabled = false;
   }
+}
+
+function answerModePresentation(payload) {
+  if (!payload.observed_facts?.length) {
+    return { label: text("insufficientData"), classes: "rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[11px] text-amber-800 font-medium" };
+  }
+  if (payload.answer_mode === "llm_routed") {
+    return { label: text("aiRouted"), classes: "ai-mode rounded-full border px-2.5 py-1 text-[11px] font-medium" };
+  }
+  return { label: text("deterministicFallback"), classes: "rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] text-subtext font-medium" };
 }
 
 async function renderQuestionEvidence(facts) {
@@ -648,41 +880,106 @@ function renderAnswerEvidenceEmpty(container, message) {
   container.appendChild(empty);
 }
 
-function exportRiskReport(risk) {
+function renderTimeline() {
+  const container = document.getElementById("timelineList");
+  if (!container) return;
+  container.replaceChildren();
+  const risks = currentAnalysis?.risks || [];
+  const entries = [];
+  const evidenceIds = new Set();
+  risks.forEach((risk) => {
+    risk.observed_data.forEach((evidence) => {
+      if (evidenceIds.has(evidence.evidence_id)) return;
+      evidenceIds.add(evidence.evidence_id);
+      entries.push({
+        type: evidence.source_file.replace(".csv", ""),
+        timestamp: evidence.timestamp,
+        zone: evidence.zone_id,
+        facts: evidence.facts,
+        label: Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · "),
+        riskId: risk.risk_id,
+        priority: risk.priority,
+        source: `${evidence.source_file}:${evidence.source_row}`
+      });
+    });
+    entries.push({
+      type: "risk",
+      timestamp: risk.detected_at,
+      zone: risk.zone_id,
+      facts: {},
+      label: `${risk.title} · ${risk.score}/100`,
+      riskId: risk.risk_id,
+      priority: risk.priority,
+      source: risk.risk_id
+    });
+  });
+  const shiftEnd = currentAnalysis?.overview?.shift_ended_at ? new Date(currentAnalysis.overview.shift_ended_at) : null;
+  const recentOnly = document.getElementById("timelineRecentOnly")?.checked;
+  const filtered = entries.filter((entry) => {
+    if (zoneFilter !== "all" && entry.zone !== zoneFilter) return false;
+    if (entityFilter && !Object.values(entry.facts).some((value) => String(value) === entityFilter)) return false;
+    if (recentOnly && shiftEnd && entry.timestamp) {
+      return new Date(entry.timestamp) >= new Date(shiftEnd.getTime() - 30 * 60 * 1000);
+    }
+    return true;
+  }).sort((first, second) => new Date(first.timestamp || 0) - new Date(second.timestamp || 0));
+  if (!filtered.length) {
+    renderRiskEmpty(container, text("noTimeline"));
+    return;
+  }
+  filtered.forEach((entry) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    const emphasized = entry.type === "risk" && ["CRITICAL", "HIGH"].includes(entry.priority);
+    button.className = `focus-ring grid grid-cols-[88px_88px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border px-3.5 py-3 text-left text-xs ${emphasized ? "border-rose-100 bg-rose-50" : "border-line bg-subtle/50"}`;
+    button.innerHTML = `<span class="font-mono text-subtext">${formatDateTime(entry.timestamp)}</span><span class="font-medium text-heavy capitalize">${escapeHtml(entry.type)}</span><span class="min-w-0 break-words text-heavy">${escapeHtml(entry.label)}</span><span class="font-mono text-[11px] text-subtext">${escapeHtml(entry.source)}</span>`;
+    button.addEventListener("click", () => {
+      selectedRiskId = entry.riskId;
+      renderRiskCards();
+      renderSelectedRisk();
+      document.getElementById("inspectorContainer").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    container.appendChild(button);
+  });
+}
+
+function buildRiskReport(risk) {
   const overview = currentAnalysis.overview;
-  const lines = [
-    risk.title,
-    `${text("score")}: ${risk.score}/100`,
-    `${text("filterPriority")}: ${risk.priority}`,
-    `${text("operatingZone")}: ${risk.zone_id || "—"}`,
-    `${text("shiftStart")}: ${formatDateTime(overview.shift_started_at)}`,
-    `${text("shiftEnd")}: ${formatDateTime(overview.shift_ended_at)}`,
-    "",
-    `${text("recommendedProtocol")}:`,
-    risk.recommended_action,
-    "",
-    `${text("analysisReasoning")}:`,
-    risk.interpretation,
-    "",
-    `${text("evidenceHeader")}:`,
-    ...risk.observed_data.map((evidence) => {
-      const facts = Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · ");
-      return `${formatDateTime(evidence.timestamp)} | ${evidence.zone_id || "—"} | ${evidence.source_file}:${evidence.source_row} | ${facts}`;
-    }),
-    "",
-    `${text("limitations")}:`,
-    ...(risk.limitations.length ? risk.limitations : ["—"])
-  ];
-  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  return {
+    analysis_id: currentAnalysis.analysis_id,
+    generated_at: new Date().toISOString(),
+    data_coverage: overview.files,
+    overview,
+    risk,
+    risk_thresholds: riskThresholds
+  };
+}
+
+function exportRiskJson(risk) {
+  const report = buildRiskReport(risk);
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${risk.risk_id}-report.txt`;
+  link.download = `${risk.risk_id}-${new Date().toISOString().replaceAll(":", "-")}.json`;
   link.hidden = true;
   document.body.appendChild(link);
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function printRiskReport(risk) {
+  const report = buildRiskReport(risk);
+  const scoreRows = Object.entries(risk.score_breakdown).map(([key, value]) => `<tr><td>${escapeHtml(key)}</td><td>${value}</td></tr>`).join("");
+  const evidenceRows = risk.observed_data.map((evidence) => `<tr><td>${formatDateTime(evidence.timestamp)}</td><td>${escapeHtml(evidence.zone_id || "—")}</td><td>${escapeHtml(evidence.source_file)}:${evidence.source_row}</td><td>${escapeHtml(JSON.stringify(evidence.facts))}</td></tr>`).join("");
+  const fileRows = report.data_coverage.map((file) => `<tr><td>${escapeHtml(file.source_file || file.file_type)}</td><td>${file.received_records}</td><td>${file.valid_records}</td><td>${file.rejected_records}</td></tr>`).join("");
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) return;
+  printWindow.opener = null;
+  printWindow.document.write(`<!doctype html><html><head><title>${escapeHtml(risk.risk_id)}</title><style>body{font:14px Arial,sans-serif;color:#111;margin:32px}h1{font-size:24px}h2{font-size:16px;margin-top:24px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ddd;padding:8px;text-align:left;vertical-align:top}.meta{color:#555}.action{background:#fff8e8;padding:12px;border:1px solid #ead9b7}.limits{background:#fffbea;padding:12px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">${escapeHtml(text("printReport"))}</button><h1>${escapeHtml(risk.title)}</h1><p class="meta">${escapeHtml(report.analysis_id)} · ${escapeHtml(report.generated_at)} · ${escapeHtml(risk.priority)} · ${risk.score}/100</p><p>${escapeHtml(risk.zone_id || "—")} · ${escapeHtml(risk.affected_entities.map((entity) => `${entity.type}: ${entity.id}`).join(" · "))}</p><h2>Data coverage</h2><table><tr><th>File</th><th>Received</th><th>Valid</th><th>Rejected</th></tr>${fileRows}</table><h2>${escapeHtml(text("evidenceHeader"))}</h2><table><tr><th>Time</th><th>Zone</th><th>Source</th><th>Observed values</th></tr>${evidenceRows}</table><h2>${escapeHtml(text("analysisReasoning"))}</h2><p>${escapeHtml(risk.interpretation)}</p><h2>${escapeHtml(text("recommendedProtocol"))}</h2><p class="action">${escapeHtml(risk.recommended_action)}</p><h2>${escapeHtml(text("limitations"))}</h2><div class="limits">${risk.limitations.map((item) => `<p>${escapeHtml(item)}</p>`).join("")}</div><h2>${escapeHtml(text("scoreBreakdown"))}</h2><table>${scoreRows}</table><h2>Thresholds</h2><pre>${escapeHtml(JSON.stringify(riskThresholds, null, 2))}</pre></body></html>`);
+  printWindow.document.close();
+  printWindow.focus();
 }
 
 function formatDateTime(value) {
@@ -712,10 +1009,26 @@ function escapeHtml(value) {
 }
 
 renderFileStatus();
-changeLanguage("en");
+changeLanguage(currentLanguage);
 checkApiStatus();
 
 const dropZone = document.getElementById("dropZone");
+document.getElementById("clearFilesButton").addEventListener("click", (event) => {
+  event.stopPropagation();
+  clearFiles();
+});
+document.getElementById("replaceFileInput").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file && replaceTarget && file.name.toLowerCase() === `${replaceTarget}.csv`) {
+    selectFiles([file]);
+  } else if (file) {
+    showFileFeedback(text("unknownFileError", { name: file.name }), true);
+  }
+  replaceTarget = null;
+  event.target.value = "";
+});
+document.getElementById("dataQualityPanel").addEventListener("toggle", savePreferences);
+document.getElementById("timelineRecentOnly").addEventListener("change", renderTimeline);
 dropZone.addEventListener("click", (event) => {
   if (event.target.closest("button")) return;
   document.getElementById("csvFileInput").click();

@@ -32,3 +32,19 @@ def test_frontend_exposes_grounding_and_quality_sections() -> None:
     assert "overview?.processing_summary" in javascript
     assert 'dropZone.addEventListener("drop"' in javascript
     assert "selectFiles(event.dataTransfer.files)" in javascript
+
+
+def test_frontend_exposes_ai_status_and_managed_uploads() -> None:
+    html = (PROJECT_ROOT / "index.html").read_text(encoding="utf-8")
+    javascript = (PROJECT_ROOT / "app.js").read_text(encoding="utf-8")
+
+    assert 'id="aiStatus"' in html
+    assert 'id="clearFilesButton"' in html
+    assert 'id="replaceFileInput"' in html
+    assert 'id="detailLimitations"' in html
+    assert 'id="answerMode"' in html
+    assert 'fetch(apiUrl("/api/config/ai")' in javascript
+    assert "function removeFile" in javascript
+    assert "function beginReplaceFile" in javascript
+    assert "maxFileBytes" in javascript
+    assert "answerModePresentation" in javascript

@@ -12,7 +12,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .app-header { display: grid; grid-template-columns: minmax(260px, 1fr) auto; }
-    .metric-grid { display: grid; grid-template-columns: repeat(4, 112px); }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, 140px); }
     .metric-item { min-width: 0; }
     .metric-label { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .language-select { width: 136px; min-width: 136px; }
@@ -22,6 +22,13 @@
     .analysis-button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .focus-ring:focus-visible { outline: 2px solid #212529; outline-offset: 2px; }
     .spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 9999px; animation: spin .7s linear infinite; }
+    .file-list-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+    .observed-panel { border-color: #dbeafe; background: #eff6ff99; }
+    .observed-heading { color: #075985; }
+    .interpretation-panel { border: 1px solid #e9ecef; background: #f1f3f580; }
+    .limitations-panel { border-color: #fef3c7; background: #fffbeb; }
+    .ai-connected { background: #f5f3ff; color: #6d28d9; border: 1px solid #ede9fe; }
+    .ai-mode { background: #f5f3ff; color: #6d28d9; border-color: #ede9fe; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
@@ -31,10 +38,12 @@
       .header-actions { justify-content: space-between; }
     }
     @media (max-width: 720px) {
-      .header-context { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; width: 100%; }
+      .header-context { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
       .app-title { grid-column: 1 / -1; white-space: normal; }
       .header-divider { display: none; }
       .shift-status { min-width: 0; max-width: none; width: 100%; }
+      #apiStatus { min-width: 0; width: 100%; }
+      #aiStatus { grid-column: 1 / -1; min-width: 0; width: 100%; }
       .metric-grid { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(110px, 1fr)); width: 100%; }
       .metric-label { min-height: 32px; white-space: normal; line-height: 1.25; }
       .header-actions { display: grid !important; grid-template-columns: 1fr auto; width: 100%; }
@@ -43,7 +52,10 @@
       .language-select,
       .data-button,
       .analysis-button { width: 100%; min-width: 0; }
+      .file-list-grid { grid-template-columns: 1fr; }
+      #timelineList button { grid-template-columns: 1fr !important; }
     }
+    @media (min-width: 721px) and (max-width: 1279px) { .file-list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans">
@@ -57,6 +69,7 @@
         <span id="shiftIndicator" class="truncate" data-i18n="awaitingShift">Awaiting Shift Dataset</span>
       </div>
       <div id="apiStatus" class="min-w-[112px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-subtext" role="status" aria-live="polite">Checking API</div>
+      <div id="aiStatus" class="min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-subtext" role="status" aria-live="polite">Checking AI</div>
     </div>
 
     <div class="header-actions flex flex-wrap items-center justify-end gap-4 lg:gap-6">
@@ -109,10 +122,12 @@
         <div class="flex flex-wrap items-center gap-3 mb-3">
           <h2 id="datasetHeading" class="text-sm font-semibold text-heavy" data-i18n="datasetTitle">Dataset readiness</h2>
           <span id="missingFilesBadge" class="hidden rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800"></span>
+          <button id="clearFilesButton" type="button" class="focus-ring hidden ml-auto rounded-lg border border-line bg-surface px-3 py-1.5 text-[11px] font-medium text-subtext hover:text-heavy" data-i18n="clearFiles">Clear all</button>
         </div>
         <p class="mb-3 text-xs text-subtext" data-i18n="dropHint">workers.csv, equipment.csv, environment.csv, events.csv — or click to browse</p>
-        <div id="selectedFileList" class="flex flex-wrap gap-2 text-xs text-subtext"></div>
+        <div id="selectedFileList" class="file-list-grid text-xs text-subtext"></div>
         <p id="missingFileList" class="mt-3 text-xs text-subtext" role="status" aria-live="polite"></p>
+        <p id="fileCoverageNotice" class="hidden mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800" role="status" aria-live="polite"></p>
       </div>
       <div class="grid grid-cols-2 gap-3 min-w-[280px]">
         <div class="rounded-xl bg-subtle/70 px-4 py-3">
@@ -125,6 +140,7 @@
         </div>
       </div>
     </section>
+    <input type="file" id="replaceFileInput" accept=".csv,text/csv" class="hidden" />
 
     <section class="col-span-12 lg:col-span-7 flex flex-col gap-6">
       <div id="inspectorContainer" class="bg-surface border border-line rounded-2xl p-7 soft-shadow">
@@ -148,7 +164,23 @@
               <h2 id="detailTitle" class="text-xl font-bold text-heavy tracking-tight"></h2>
               <div id="detailEntities" class="flex flex-wrap gap-2 mt-2"></div>
             </div>
-            <button id="exportButton" type="button" class="focus-ring hidden shrink-0 bg-subtle hover:bg-neutral-200 text-heavy px-3.5 py-2 rounded-xl text-xs font-medium transition-colors" data-i18n="exportReport">Export report</button>
+            <div id="reportActions" class="hidden shrink-0 flex flex-wrap gap-2">
+              <button id="printButton" type="button" class="focus-ring bg-subtle hover:bg-neutral-200 text-heavy px-3.5 py-2 rounded-xl text-xs font-medium transition-colors" data-i18n="printReport">Print / Save PDF</button>
+              <button id="jsonExportButton" type="button" class="focus-ring bg-subtle hover:bg-neutral-200 text-heavy px-3.5 py-2 rounded-xl text-xs font-medium transition-colors" data-i18n="exportJson">Export JSON</button>
+            </div>
+          </div>
+
+          <div class="observed-panel mt-6 rounded-2xl border p-5">
+            <div class="flex items-center justify-between mb-3.5">
+              <h3 class="observed-heading text-xs font-semibold uppercase tracking-wider" data-i18n="evidenceHeader">Supporting Evidence (Observed Shift Data)</h3>
+              <span id="evidenceCount" class="text-[11px] text-subtext font-mono"></span>
+            </div>
+            <div id="evidenceList" class="flex flex-col gap-2.5"></div>
+          </div>
+
+          <div class="interpretation-panel mt-6 rounded-2xl p-5">
+            <div class="text-xs font-semibold text-heavy uppercase tracking-wider mb-2" data-i18n="analysisReasoning">Analysis Reasoning</div>
+            <p id="detailReasoning" class="text-xs text-subtext leading-relaxed"></p>
           </div>
 
           <div class="mt-6 bg-[#FDFBF7] border border-[#F2ECE1] rounded-2xl p-5">
@@ -159,17 +191,9 @@
             <p id="detailAction" class="text-sm font-medium text-[#423319] leading-relaxed"></p>
           </div>
 
-          <div class="mt-6">
-            <div class="flex items-center justify-between mb-3.5">
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-subtext" data-i18n="evidenceHeader">Supporting Evidence (Observed Shift Data)</h3>
-              <span id="evidenceCount" class="text-[11px] text-subtext font-mono"></span>
-            </div>
-            <div id="evidenceList" class="flex flex-col gap-2.5"></div>
-          </div>
-
-          <div class="mt-6 pt-5 border-t border-line">
-            <div class="text-xs font-semibold text-subtext uppercase tracking-wider mb-2" data-i18n="analysisReasoning">Analysis Reasoning</div>
-            <p id="detailReasoning" class="text-xs text-subtext leading-relaxed"></p>
+          <div id="limitationsPanel" class="limitations-panel mt-6 rounded-2xl border p-5">
+            <div class="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-2" data-i18n="limitations">Limitations</div>
+            <div id="detailLimitations" class="grid gap-2 text-xs text-amber-800"></div>
           </div>
 
           <div class="mt-6 pt-5 border-t border-line">
@@ -215,7 +239,7 @@
         <div id="answerBox" class="mt-4 p-4 bg-subtle/70 rounded-xl border border-line hidden" role="status" aria-live="polite" aria-atomic="true">
           <div class="flex items-center justify-between mb-1.5">
             <span id="answerQuestion" class="text-xs font-semibold text-heavy"></span>
-            <span class="text-[11px] text-subtext font-mono" data-i18n="matchVerified">Grounding Verified</span>
+            <span id="answerMode" class="rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] text-subtext font-medium" data-i18n="matchVerified">Grounding Verified</span>
           </div>
           <p id="answerContent" class="text-xs text-subtext leading-relaxed mb-2.5"></p>
           <div class="text-[11px] font-medium text-subtext mb-2" data-i18n="sourceRef">Evidence references</div>
@@ -258,6 +282,20 @@
         </div>
       </div>
     </aside>
+
+    <section class="col-span-12 bg-surface border border-line rounded-2xl p-5 soft-shadow" aria-labelledby="timelineHeading">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 id="timelineHeading" class="text-sm font-semibold text-heavy" data-i18n="timelineTitle">Evidence timeline</h2>
+          <p class="mt-1 text-xs text-subtext" data-i18n="timelineNotice">Shows only observed records returned by the analysis; no movement path is inferred.</p>
+        </div>
+        <label class="flex items-center gap-2 text-xs text-subtext">
+          <input id="timelineRecentOnly" type="checkbox" class="h-4 w-4 rounded border-line" checked />
+          <span data-i18n="recentThirty">Last 30 minutes</span>
+        </label>
+      </div>
+      <div id="timelineList" class="grid gap-2"></div>
+    </section>
   </main>
 
   <script src="app.js"></script>
