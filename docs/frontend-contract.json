@@ -116,11 +116,18 @@
         "exposure": 12,
         "corroboration": 15,
         "magnitude": 7
-      }
+      },
+      "priority_reasons": [
+        "Severity contributes 30/40 from the observed trigger.",
+        "Immediacy contributes 18/20 from recency within dataset time.",
+        "Exposure contributes 12/15 from affected entities in the evidence context.",
+        "Corroboration contributes 15/15 from independent source coverage.",
+        "Magnitude contributes 7/10 from the recorded value or event class."
+      ]
     }
   ],
   "metadata": {
-    "engine_version": "0.6.0",
+    "engine_version": "0.7.0",
     "analyzed_at": "2026-09-19T15:31:00Z",
     "source_of_truth": "uploaded_csv",
     "data_fingerprint": "63c01c327593cdd5637f15415250abb0f0bd694a2b5b6f4b6337568914eae11a",

@@ -13,10 +13,27 @@ from app.models.responses import (
     Risk,
     ScoreBreakdown,
 )
-from app.services.localization import tr
+from app.services.localization import field_display, localize_diagnostics, tr
 
 HIGH_EVENT_SEVERITIES = {"high", "critical", "severe", "emergency"}
 CRITICAL_EVENT_SEVERITIES = {"critical", "emergency"}
+SAFETY_CRITICAL_EVENT_TERMS = {
+    "collision",
+    "near_miss",
+    "near miss",
+    "gas_alarm",
+    "gas alarm",
+    "fire",
+    "explosion",
+    "restricted_area",
+    "restricted area",
+    "unauthorized",
+    "rollover",
+    "rockfall",
+    "rock fall",
+    "injury",
+    "emergency",
+}
 ABNORMAL_WORKER_STATUSES = {
     "distress",
     "emergency",
@@ -62,7 +79,7 @@ def normalized_event_severity(value: object) -> str:
     return normalized
 
 
-def record_evidence(record: NormalizedRecord) -> Evidence:
+def record_evidence(record: NormalizedRecord, language: Language) -> Evidence:
     return Evidence(
         evidence_id=record.evidence_id,
         source_file=record.source_file,
@@ -70,12 +87,16 @@ def record_evidence(record: NormalizedRecord) -> Evidence:
         timestamp=record.timestamp,
         zone_id=record.zone_id,
         facts=record.values,
-        validation_issues=record.validation_issues,
+        validation_issues=localize_diagnostics(record.validation_issues, language),
     )
 
 
-def unique_evidence(records: Iterable[NormalizedRecord]) -> list[Evidence]:
-    by_id = {record.evidence_id: record_evidence(record) for record in records}
+def unique_evidence(
+    records: Iterable[NormalizedRecord], language: Language
+) -> list[Evidence]:
+    by_id = {
+        record.evidence_id: record_evidence(record, language) for record in records
+    }
     return sorted(
         by_id.values(),
         key=lambda evidence: (evidence.timestamp or datetime.min, evidence.source_file, evidence.source_row),
@@ -126,6 +147,7 @@ def make_risk(
     exposure: int,
     corroboration: int,
     magnitude: int,
+    language: Language,
 ) -> Risk:
     breakdown = ScoreBreakdown(
         severity=min(40, max(0, severity)),
@@ -135,7 +157,14 @@ def make_risk(
         magnitude=min(10, max(0, magnitude)),
     )
     score = sum(breakdown.model_dump().values())
-    evidence = unique_evidence(records)
+    evidence = unique_evidence(records, language)
+    priority_reasons = [
+        tr(language, "score.severity", score=breakdown.severity),
+        tr(language, "score.immediacy", score=breakdown.immediacy),
+        tr(language, "score.exposure", score=breakdown.exposure),
+        tr(language, "score.corroboration", score=breakdown.corroboration),
+        tr(language, "score.magnitude", score=breakdown.magnitude),
+    ]
     return Risk(
         risk_id=stable_risk_id(rule, evidence),
         title=title,
@@ -149,6 +178,7 @@ def make_risk(
         recommended_action=recommended_action,
         limitations=limitations,
         score_breakdown=breakdown,
+        priority_reasons=priority_reasons,
     )
 
 
@@ -209,7 +239,14 @@ def detect_event_risks(
         if event.record_type != "events":
             continue
         severity_value = normalized_event_severity(event.values.get("severity"))
-        if severity_value not in HIGH_EVENT_SEVERITIES:
+        event_type = str(event.values.get("event_type") or "").strip()
+        description = str(event.values.get("description") or "").strip()
+        event_search_text = f"{event_type} {description}".casefold().replace("-", "_")
+        safety_critical_type = any(
+            term in event_search_text for term in SAFETY_CRITICAL_EVENT_TERMS
+        )
+        high_severity = severity_value in HIGH_EVENT_SEVERITIES
+        if not high_severity and not safety_critical_type:
             continue
         context = records_near(
             records,
@@ -220,22 +257,44 @@ def detect_event_risks(
         )
         affected = affected_from_context(context)
         source_types = {record.record_type for record in context} | {"events"}
-        event_type = event.values.get("event_type") or "unspecified event"
-        severity_score = 40 if severity_value in CRITICAL_EVENT_SEVERITIES else 32
+        displayed_event_type = event.values.get("event_type") or "—"
+        displayed_severity = severity_value or "—"
+        severity_score = (
+            40
+            if severity_value in CRITICAL_EVENT_SEVERITIES
+            else 32
+            if high_severity
+            else 26
+        )
         risks.append(
             make_risk(
-                rule="high_severity_event",
-                title=tr(language, "risk.event.title"),
+                rule="high_severity_event" if high_severity else "safety_critical_event",
+                title=tr(
+                    language,
+                    "risk.event.title"
+                    if high_severity
+                    else "risk.event.investigation.title",
+                ),
                 zone_id=event.zone_id,
                 detected_at=event.timestamp,
                 entities=affected,
                 records=[event, *context],
-                interpretation=tr(
-                    language,
-                    "risk.event.interpretation",
-                    event_id=event.entity_id,
-                    severity=severity_value,
-                    event_type=event_type,
+                interpretation=(
+                    tr(
+                        language,
+                        "risk.event.interpretation",
+                        event_id=event.entity_id,
+                        severity=displayed_severity,
+                        event_type=displayed_event_type,
+                    )
+                    if high_severity
+                    else tr(
+                        language,
+                        "risk.event.investigation.interpretation",
+                        event_id=event.entity_id,
+                        severity=displayed_severity,
+                        event_type=displayed_event_type,
+                    )
                 ),
                 recommended_action=tr(language, "risk.event.action"),
                 limitations=[
@@ -246,7 +305,14 @@ def detect_event_risks(
                 immediacy=immediacy_score(event.timestamp, dataset_now),
                 exposure=min(15, len(affected) * 3),
                 corroboration=min(15, len(source_types) * 5),
-                magnitude=10 if severity_value in CRITICAL_EVENT_SEVERITIES else 7,
+                magnitude=(
+                    10
+                    if severity_value in CRITICAL_EVENT_SEVERITIES
+                    else 7
+                    if high_severity
+                    else 6
+                ),
+                language=language,
             )
         )
     return risks
@@ -321,6 +387,7 @@ def detect_worker_equipment_conflicts(
                     exposure=10,
                     corroboration=min(15, len(source_types) * 5),
                     magnitude=10 if speed >= 25 else 7 if speed >= 10 else 4,
+                    language=language,
                 )
             )
     return risks
@@ -378,7 +445,7 @@ def environmental_trends(
                 tr(
                     language,
                     "trend.increased",
-                    field=tr(language, f"field.{field}"),
+                    field=field_display(field, language),
                     first=f"{first_value:g}",
                     last=f"{last_value:g}",
                 )
@@ -394,7 +461,7 @@ def environmental_trends(
             tr(
                 language,
                 "trend.decreased",
-                field=tr(language, "field.visibility"),
+                field=field_display("visibility", language),
                 first=f"{first_visibility:g}",
                 last=f"{last_visibility:g}",
             )
@@ -435,7 +502,7 @@ def detect_environment_risks(
             tr(
                 language,
                 "risk.environment.condition",
-                name=tr(language, f"field.{name}"),
+                name=field_display(name, language),
                 value=f"{value:g}",
                 operator=operator,
                 threshold=f"{threshold:g}",
@@ -470,6 +537,7 @@ def detect_environment_risks(
                 exposure=min(15, len(entities) * 3),
                 corroboration=min(15, len(source_types) * 5),
                 magnitude=10 if critical else 8 if len(conditions) >= 2 else 5,
+                language=language,
             )
         )
     return risks
@@ -533,6 +601,7 @@ def detect_status_risks(
                 exposure=5,
                 corroboration=min(15, 5 + len({item.record_type for item in context}) * 5),
                 magnitude=8 if urgent else 3,
+                language=language,
             )
         )
     return risks
@@ -576,9 +645,104 @@ def detect_telemetry_inconsistencies(
                 exposure=5,
                 corroboration=5,
                 magnitude=5,
+                language=language,
             )
         )
     return risks
+
+
+def detect_compound_zone_risks(
+    categorized_risks: dict[str, list[Risk]],
+    records: list[NormalizedRecord],
+    dataset_now: datetime,
+    thresholds: RiskThresholds,
+    language: Language,
+) -> list[Risk]:
+    cutoff = dataset_now - timedelta(minutes=thresholds.active_window_minutes)
+    zones = {
+        risk.zone_id
+        for risks in categorized_risks.values()
+        for risk in risks
+        if risk.zone_id is not None and risk.detected_at >= cutoff
+    }
+    record_by_evidence = {record.evidence_id: record for record in records}
+    compound: list[Risk] = []
+    for zone_id in sorted(zones):
+        by_category = {
+            category: [
+                risk
+                for risk in risks
+                if risk.zone_id == zone_id and risk.detected_at >= cutoff
+            ]
+            for category, risks in categorized_risks.items()
+        }
+        active_categories = {
+            category: risks for category, risks in by_category.items() if risks
+        }
+        if len(active_categories) < 3:
+            continue
+        supporting_risks = [
+            risk for risks in active_categories.values() for risk in risks
+        ]
+        evidence_ids = {
+            evidence.evidence_id
+            for risk in supporting_risks
+            for evidence in risk.observed_data
+        }
+        supporting_records = [
+            record_by_evidence[evidence_id]
+            for evidence_id in sorted(evidence_ids)
+            if evidence_id in record_by_evidence
+        ]
+        entities = {
+            (entity.type, entity.id): entity
+            for risk in supporting_risks
+            for entity in risk.affected_entities
+        }
+        affected = sorted(
+            entities.values(), key=lambda item: (item.type.value, item.id)
+        )
+        category_titles = "; ".join(
+            dict.fromkeys(
+                risk.title
+                for category in sorted(active_categories)
+                for risk in active_categories[category]
+            )
+        )
+        detected_at = max(risk.detected_at for risk in supporting_risks)
+        has_critical = any(
+            risk.priority == Priority.CRITICAL for risk in supporting_risks
+        )
+        compound.append(
+            make_risk(
+                rule="compound_zone_escalation",
+                title=tr(language, "risk.compound.title"),
+                zone_id=zone_id,
+                detected_at=detected_at,
+                entities=affected,
+                records=supporting_records,
+                interpretation=tr(
+                    language,
+                    "risk.compound.interpretation",
+                    zone_id=zone_id,
+                    categories=category_titles,
+                ),
+                recommended_action=tr(
+                    language, "risk.compound.action", zone_id=zone_id
+                ),
+                limitations=[
+                    tr(language, "risk.compound.limit.cause"),
+                    tr(language, "risk.compound.limit.context"),
+                ],
+                severity=40 if has_critical else 34,
+                immediacy=immediacy_score(detected_at, dataset_now),
+                exposure=min(15, len(affected) * 5),
+                corroboration=15,
+                magnitude=10 if has_critical else 8,
+                language=language,
+            )
+        )
+    return compound
 
 
 def detect_risks(
@@ -588,12 +752,36 @@ def detect_risks(
     if not records:
         return []
     dataset_now = max(record.timestamp for record in records)
+    event_risks = detect_event_risks(records, dataset_now, thresholds, language)
+    conflict_risks = detect_worker_equipment_conflicts(
+        records, dataset_now, thresholds, language
+    )
+    environment_risks = detect_environment_risks(
+        records, dataset_now, thresholds, language
+    )
+    status_risks = detect_status_risks(records, dataset_now, thresholds, language)
+    telemetry_risks = detect_telemetry_inconsistencies(
+        records, dataset_now, thresholds, language
+    )
+    compound_risks = detect_compound_zone_risks(
+        {
+            "event": event_risks,
+            "conflict": conflict_risks,
+            "environment": environment_risks,
+            "status": status_risks,
+        },
+        records,
+        dataset_now,
+        thresholds,
+        language,
+    )
     risks = [
-        *detect_event_risks(records, dataset_now, thresholds, language),
-        *detect_worker_equipment_conflicts(records, dataset_now, thresholds, language),
-        *detect_environment_risks(records, dataset_now, thresholds, language),
-        *detect_status_risks(records, dataset_now, thresholds, language),
-        *detect_telemetry_inconsistencies(records, dataset_now, thresholds, language),
+        *compound_risks,
+        *event_risks,
+        *conflict_risks,
+        *environment_risks,
+        *status_risks,
+        *telemetry_risks,
     ]
     unique = {risk.risk_id: risk for risk in risks}
     return sorted(

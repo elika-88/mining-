@@ -1,3 +1,5 @@
+import re
+
 from app.models.responses import Language
 
 
@@ -8,6 +10,13 @@ TEXT: dict[Language, dict[str, str]] = {
         "risk.event.action": "Verify the recorded event, contact the responsible zone supervisor, and follow the site's escalation procedure.",
         "risk.event.limit.cause": "The event record does not prove its root cause.",
         "risk.event.limit.context": "Nearby entities are time-and-zone context only; precise distance is unavailable.",
+        "risk.event.investigation.title": "Recorded safety event requiring investigation",
+        "risk.event.investigation.interpretation": "Event {event_id} has recorded type {event_type} and severity {severity}. Its recorded event type matches a safety-critical investigation category.",
+        "risk.compound.title": "Compound zone risk escalation",
+        "risk.compound.interpretation": "{zone_id} has concurrent risk signals from {categories}. The signals are independently supported by uploaded records and increase the need for coordinated investigation.",
+        "risk.compound.action": "Pause non-essential activity in {zone_id}, account for affected workers and equipment, verify the cited event and environmental readings, and coordinate one zone-level response.",
+        "risk.compound.limit.cause": "Concurrent signals do not prove a shared root cause.",
+        "risk.compound.limit.context": "Zone-and-time correlation does not establish precise distance or causal order.",
         "risk.conflict.title": "Potential worker–vehicle conflict",
         "risk.conflict.interpretation": "Worker {worker_id} and moving equipment {equipment_id} were recorded in {zone_id} within {minutes} minutes. The recorded equipment speed value is {speed}.",
         "risk.conflict.action": "Verify the current positions of {worker_id} and {equipment_id}, contact the zone coordinator, and apply the site's traffic-control procedure.",
@@ -34,9 +43,27 @@ TEXT: dict[Language, dict[str, str]] = {
         "entity.worker.title": "Worker",
         "entity.equipment": "equipment",
         "entity.equipment.title": "Equipment",
-        "field.gas_level": "gas_level",
+        "field.gas_level": "gas level",
         "field.temperature": "temperature",
         "field.visibility": "visibility",
+        "field.worker_id": "worker ID",
+        "field.equipment_id": "equipment ID",
+        "field.equipment_type": "equipment type",
+        "field.event_id": "event ID",
+        "field.timestamp": "timestamp",
+        "field.zone_id": "zone ID",
+        "field.status": "status",
+        "field.speed": "speed",
+        "field.event_type": "event type",
+        "field.severity": "severity",
+        "field.description": "description",
+        "field.source_timestamp": "source timestamp",
+        "field.timestamp_date_available": "timestamp date available",
+        "score.severity": "Severity contributes {score}/40 from the observed trigger.",
+        "score.immediacy": "Immediacy contributes {score}/20 from recency within dataset time.",
+        "score.exposure": "Exposure contributes {score}/15 from affected entities in the evidence context.",
+        "score.corroboration": "Corroboration contributes {score}/15 from independent source coverage.",
+        "score.magnitude": "Magnitude contributes {score}/10 from the recorded value or event class.",
         "trend.increased": "{field} increased from {first} to {last}",
         "trend.decreased": "{field} decreased from {first} to {last}",
         "priority.critical": "CRITICAL",
@@ -50,6 +77,13 @@ TEXT: dict[Language, dict[str, str]] = {
         "risk.event.action": "Проверьте зарегистрированное событие, свяжитесь с ответственным руководителем зоны и выполните принятую процедуру эскалации.",
         "risk.event.limit.cause": "Запись о событии не доказывает его первопричину.",
         "risk.event.limit.context": "Ближайшие объекты являются только контекстом по времени и зоне; точное расстояние неизвестно.",
+        "risk.event.investigation.title": "Зарегистрированное событие требует проверки",
+        "risk.event.investigation.interpretation": "Для события {event_id} зарегистрированы тип {event_type} и тяжесть {severity}. Тип события относится к категории критически важных для безопасности проверок.",
+        "risk.compound.title": "Комплексное обострение риска в зоне",
+        "risk.compound.interpretation": "В зоне {zone_id} одновременно присутствуют сигналы риска: {categories}. Каждый сигнал подтверждается загруженными записями, поэтому требуется скоординированная проверка.",
+        "risk.compound.action": "Приостановите необязательные работы в зоне {zone_id}, проверьте работников и технику, указанные события и показания среды и организуйте единое реагирование по зоне.",
+        "risk.compound.limit.cause": "Одновременные сигналы не доказывают общую первопричину.",
+        "risk.compound.limit.context": "Совпадение по зоне и времени не определяет точное расстояние или причинный порядок.",
         "risk.conflict.title": "Возможный конфликт работника и транспорта",
         "risk.conflict.interpretation": "Работник {worker_id} и движущаяся техника {equipment_id} зарегистрированы в {zone_id} с интервалом не более {minutes} минут. Зарегистрированное значение скорости техники: {speed}.",
         "risk.conflict.action": "Проверьте текущее положение {worker_id} и {equipment_id}, свяжитесь с координатором зоны и примените принятую схему управления движением.",
@@ -79,6 +113,24 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.gas_level": "уровень газа",
         "field.temperature": "температура",
         "field.visibility": "видимость",
+        "field.worker_id": "ID работника",
+        "field.equipment_id": "ID оборудования",
+        "field.equipment_type": "тип оборудования",
+        "field.event_id": "ID события",
+        "field.timestamp": "временная метка",
+        "field.zone_id": "ID зоны",
+        "field.status": "статус",
+        "field.speed": "скорость",
+        "field.event_type": "тип события",
+        "field.severity": "тяжесть",
+        "field.description": "описание",
+        "field.source_timestamp": "исходное время",
+        "field.timestamp_date_available": "наличие даты времени",
+        "score.severity": "Тяжесть даёт {score}/40 на основании наблюдаемого сигнала.",
+        "score.immediacy": "Срочность даёт {score}/20 с учётом давности во времени набора данных.",
+        "score.exposure": "Воздействие даёт {score}/15 по затронутым объектам в контексте доказательств.",
+        "score.corroboration": "Подтверждение даёт {score}/15 по независимым источникам данных.",
+        "score.magnitude": "Масштаб даёт {score}/10 по зарегистрированному значению или классу события.",
         "trend.increased": "{field} увеличился с {first} до {last}",
         "trend.decreased": "{field} снизилась с {first} до {last}",
         "priority.critical": "КРИТИЧЕСКИЙ",
@@ -92,6 +144,13 @@ TEXT: dict[Language, dict[str, str]] = {
         "risk.event.action": "核实该事件，联系相关区域主管，并执行矿区既定升级处置流程。",
         "risk.event.limit.cause": "事件记录无法证明根本原因。",
         "risk.event.limit.context": "附近实体仅表示时间和区域背景；数据中没有精确距离。",
+        "risk.event.investigation.title": "需要调查的安全事件记录",
+        "risk.event.investigation.interpretation": "事件 {event_id} 的记录类型为 {event_type}，严重度为 {severity}。该事件类型属于安全关键调查类别。",
+        "risk.compound.title": "区域复合风险升级",
+        "risk.compound.interpretation": "{zone_id} 同时出现以下风险信号：{categories}。各信号均有上传记录独立支持，需要协调调查。",
+        "risk.compound.action": "暂停 {zone_id} 的非必要作业，核对受影响人员和设备，核实所引事件及环境读数，并组织统一的区域响应。",
+        "risk.compound.limit.cause": "并发信号不能证明它们具有共同根本原因。",
+        "risk.compound.limit.context": "时间和区域相关性无法确定精确距离或因果顺序。",
         "risk.conflict.title": "潜在人员与车辆冲突",
         "risk.conflict.interpretation": "人员 {worker_id} 与移动设备 {equipment_id} 在 {minutes} 分钟内被记录于 {zone_id}。设备记录的速度值为 {speed}。",
         "risk.conflict.action": "核实 {worker_id} 与 {equipment_id} 的当前位置，联系区域协调员，并执行矿区交通管制流程。",
@@ -121,6 +180,24 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.gas_level": "气体水平",
         "field.temperature": "温度",
         "field.visibility": "能见度",
+        "field.worker_id": "人员 ID",
+        "field.equipment_id": "设备 ID",
+        "field.equipment_type": "设备类型",
+        "field.event_id": "事件 ID",
+        "field.timestamp": "时间戳",
+        "field.zone_id": "区域 ID",
+        "field.status": "状态",
+        "field.speed": "速度",
+        "field.event_type": "事件类型",
+        "field.severity": "严重度",
+        "field.description": "描述",
+        "field.source_timestamp": "原始时间",
+        "field.timestamp_date_available": "时间戳日期可用性",
+        "score.severity": "严重度根据观测触发条件贡献 {score}/40。",
+        "score.immediacy": "紧迫性根据数据集时间中的新近程度贡献 {score}/20。",
+        "score.exposure": "暴露度根据证据背景中的受影响实体贡献 {score}/15。",
+        "score.corroboration": "多源佐证根据独立数据来源贡献 {score}/15。",
+        "score.magnitude": "幅度根据记录数值或事件类别贡献 {score}/10。",
         "trend.increased": "{field}从 {first} 上升到 {last}",
         "trend.decreased": "{field}从 {first} 下降到 {last}",
         "priority.critical": "紧急",
@@ -134,6 +211,13 @@ TEXT: dict[Language, dict[str, str]] = {
         "risk.event.action": "Тіркелген оқиғаны тексеріп, жауапты аймақ жетекшісіне хабарласыңыз және кен орнының эскалация тәртібін орындаңыз.",
         "risk.event.limit.cause": "Оқиға жазбасы оның түпкі себебін дәлелдемейді.",
         "risk.event.limit.context": "Жақын нысандар тек уақыт пен аймақ мәнмәтінін береді; нақты қашықтық қолжетімсіз.",
+        "risk.event.investigation.title": "Тексеруді қажет ететін қауіпсіздік оқиғасы",
+        "risk.event.investigation.interpretation": "{event_id} оқиғасының {event_type} түрі және {severity} ауырлығы тіркелген. Оқиға түрі қауіпсіздік үшін маңызды тексеру санатына жатады.",
+        "risk.compound.title": "Аймақтағы кешенді қауіптің күшеюі",
+        "risk.compound.interpretation": "{zone_id} аймағында бір уақытта мына қауіп белгілері бар: {categories}. Әр белгі жүктелген жазбалармен тәуелсіз расталған және үйлестірілген тексеруді қажет етеді.",
+        "risk.compound.action": "{zone_id} аймағындағы міндетті емес жұмысты тоқтатып, жұмысшылар мен техниканы, көрсетілген оқиғалар мен орта көрсеткіштерін тексеріп, аймақтық бірыңғай әрекетті үйлестіріңіз.",
+        "risk.compound.limit.cause": "Бір мезгілдегі белгілер ортақ түпкі себепті дәлелдемейді.",
+        "risk.compound.limit.context": "Аймақ пен уақыт сәйкестігі нақты қашықтықты немесе себептік реттілікті белгілемейді.",
         "risk.conflict.title": "Жұмысшы мен көлік арасындағы ықтимал қақтығыс",
         "risk.conflict.interpretation": "{worker_id} жұмысшысы мен қозғалыстағы {equipment_id} техникасы {minutes} минут аралығында {zone_id} аймағында тіркелген. Техниканың тіркелген жылдамдық мәні: {speed}.",
         "risk.conflict.action": "{worker_id} және {equipment_id} ағымдағы орнын тексеріп, аймақ үйлестірушісіне хабарласыңыз және қозғалысты басқару тәртібін қолданыңыз.",
@@ -163,6 +247,24 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.gas_level": "газ деңгейі",
         "field.temperature": "температура",
         "field.visibility": "көріну",
+        "field.worker_id": "жұмысшы ID-сі",
+        "field.equipment_id": "техника ID-сі",
+        "field.equipment_type": "техника түрі",
+        "field.event_id": "оқиға ID-сі",
+        "field.timestamp": "уақыт белгісі",
+        "field.zone_id": "аймақ ID-сі",
+        "field.status": "күй",
+        "field.speed": "жылдамдық",
+        "field.event_type": "оқиға түрі",
+        "field.severity": "ауырлық",
+        "field.description": "сипаттама",
+        "field.source_timestamp": "бастапқы уақыт",
+        "field.timestamp_date_available": "уақыт күнінің қолжетімділігі",
+        "score.severity": "Ауырлық бақыланған белгі бойынша {score}/40 ұпай береді.",
+        "score.immediacy": "Жеделдік деректер уақытындағы өзектілік бойынша {score}/20 ұпай береді.",
+        "score.exposure": "Әсер ету дәлел мәнмәтініндегі нысандар бойынша {score}/15 ұпай береді.",
+        "score.corroboration": "Растау тәуелсіз дереккөздер бойынша {score}/15 ұпай береді.",
+        "score.magnitude": "Ауқым тіркелген мән немесе оқиға санаты бойынша {score}/10 ұпай береді.",
         "trend.increased": "{field} {first} мәнінен {last} мәніне өсті",
         "trend.decreased": "{field} {first} мәнінен {last} мәніне төмендеді",
         "priority.critical": "СЫНДАРЛЫ",
@@ -176,6 +278,206 @@ TEXT: dict[Language, dict[str, str]] = {
 def tr(language: Language, key: str, **values: object) -> str:
     template = TEXT.get(language, TEXT[Language.EN]).get(key, TEXT[Language.EN][key])
     return template.format(**values)
+
+
+DIAGNOSTIC_TEXT: dict[Language, dict[str, str]] = {
+    Language.EN: {
+        "row": "Row {row}: {detail}",
+        "source": "{source}: {detail}",
+        "rejected": "{reason}; row was rejected.",
+        "invalid_timestamp": "invalid timestamp {value}",
+        "missing": "missing {fields}",
+        "invalid_numeric": "Invalid numeric value for {field}; stored as null.",
+        "missing_zone": "Missing {field}; excluded from zone-based analysis.",
+        "missing_field": "Missing {field}.",
+        "duplicate": "duplicate row was excluded.",
+        "too_many": "too many fields; row was rejected.",
+        "malformed_row": "malformed CSV ({error}); row was rejected.",
+        "malformed_file": "Malformed CSV: {error}.",
+        "missing_columns": "Missing expected columns: {fields}.",
+        "empty": "File is empty.",
+        "not_utf8": "File is not valid UTF-8 and was skipped.",
+        "too_large": "File exceeds the {size} MB limit and was skipped.",
+        "header_only": "File contains a header but no data rows.",
+        "time_only": "Timestamps contain time only; the source date is unavailable. Records are compared within one shift and displayed without an inferred date.",
+        "not_provided": "File was not provided.",
+        "mixed_time": "{count} time-only record(s) were excluded because the same analysis also contains dated timestamps; their calendar date cannot be grounded.",
+    },
+    Language.RU: {
+        "row": "Строка {row}: {detail}",
+        "source": "{source}: {detail}",
+        "rejected": "{reason}; строка отклонена.",
+        "invalid_timestamp": "некорректная временная метка {value}",
+        "missing": "отсутствует {fields}",
+        "invalid_numeric": "Некорректное числовое значение поля {field}; сохранено null.",
+        "missing_zone": "Отсутствует {field}; запись исключена из анализа по зонам.",
+        "missing_field": "Отсутствует {field}.",
+        "duplicate": "повторяющаяся строка исключена.",
+        "too_many": "слишком много полей; строка отклонена.",
+        "malformed_row": "ошибка структуры CSV ({error}); строка отклонена.",
+        "malformed_file": "Ошибка структуры CSV: {error}.",
+        "missing_columns": "Отсутствуют ожидаемые столбцы: {fields}.",
+        "empty": "Файл пуст.",
+        "not_utf8": "Файл не является корректным UTF-8 и пропущен.",
+        "too_large": "Файл превышает ограничение {size} МБ и пропущен.",
+        "header_only": "Файл содержит заголовок, но не содержит строк данных.",
+        "time_only": "Временные метки содержат только время; исходная дата недоступна. Записи сравниваются в рамках одной смены и показываются без вымышленной даты.",
+        "not_provided": "Файл не предоставлен.",
+        "mixed_time": "Записей только со временем исключено: {count}, поскольку анализ также содержит даты; календарную дату этих записей подтвердить невозможно.",
+    },
+    Language.ZH: {
+        "row": "第 {row} 行：{detail}",
+        "source": "{source}：{detail}",
+        "rejected": "{reason}；该行已拒绝。",
+        "invalid_timestamp": "时间戳 {value} 无效",
+        "missing": "缺少 {fields}",
+        "invalid_numeric": "{field} 的数值无效；已存储为 null。",
+        "missing_zone": "缺少 {field}；该记录不参与区域分析。",
+        "missing_field": "缺少 {field}。",
+        "duplicate": "重复行已排除。",
+        "too_many": "字段过多；该行已拒绝。",
+        "malformed_row": "CSV 格式错误（{error}）；该行已拒绝。",
+        "malformed_file": "CSV 格式错误：{error}。",
+        "missing_columns": "缺少预期列：{fields}。",
+        "empty": "文件为空。",
+        "not_utf8": "文件不是有效的 UTF-8，已跳过。",
+        "too_large": "文件超过 {size} MB 限制，已跳过。",
+        "header_only": "文件只有表头，没有数据行。",
+        "time_only": "时间戳仅包含时间，原始日期不可用。记录按同一班次比较，显示时不会推测日期。",
+        "not_provided": "未提供文件。",
+        "mixed_time": "已排除 {count} 条仅含时间的记录，因为同一分析还包含带日期时间戳，无法确认这些记录的日历日期。",
+    },
+    Language.KK: {
+        "row": "{row}-жол: {detail}",
+        "source": "{source}: {detail}",
+        "rejected": "{reason}; жол қабылданбады.",
+        "invalid_timestamp": "{value} уақыт белгісі жарамсыз",
+        "missing": "{fields} жоқ",
+        "invalid_numeric": "{field} өрісінің сандық мәні жарамсыз; null ретінде сақталды.",
+        "missing_zone": "{field} жоқ; жазба аймақтық талдаудан шығарылды.",
+        "missing_field": "{field} жоқ.",
+        "duplicate": "қайталанатын жол алынып тасталды.",
+        "too_many": "өрістер тым көп; жол қабылданбады.",
+        "malformed_row": "CSV құрылымы қате ({error}); жол қабылданбады.",
+        "malformed_file": "CSV құрылымы қате: {error}.",
+        "missing_columns": "Күтілетін бағандар жоқ: {fields}.",
+        "empty": "Файл бос.",
+        "not_utf8": "Файл жарамды UTF-8 емес және өткізіліп жіберілді.",
+        "too_large": "Файл {size} МБ шегінен асады және өткізіліп жіберілді.",
+        "header_only": "Файлда тақырып бар, бірақ дерек жолдары жоқ.",
+        "time_only": "Уақыт белгілерінде тек уақыт бар; бастапқы күн қолжетімсіз. Жазбалар бір ауысым ішінде салыстырылады және болжанған күнсіз көрсетіледі.",
+        "not_provided": "Файл берілмеген.",
+        "mixed_time": "Тек уақыты бар {count} жазба алынып тасталды, себебі талдауда күні бар уақыт белгілері де кездеседі; олардың күнтізбелік күнін негіздеу мүмкін емес.",
+    },
+}
+
+
+SOURCE_LABELS: dict[Language, dict[str, str]] = {
+    Language.EN: {"workers": "workers", "equipment": "equipment", "environment": "environment", "events": "events"},
+    Language.RU: {"workers": "работники", "equipment": "оборудование", "environment": "окружающая среда", "events": "события"},
+    Language.ZH: {"workers": "人员", "equipment": "设备", "environment": "环境", "events": "事件"},
+    Language.KK: {"workers": "жұмысшылар", "equipment": "техника", "environment": "қоршаған орта", "events": "оқиғалар"},
+}
+
+
+def diagnostic_text(language: Language, key: str, **values: object) -> str:
+    template = DIAGNOSTIC_TEXT.get(language, DIAGNOSTIC_TEXT[Language.EN]).get(
+        key, DIAGNOSTIC_TEXT[Language.EN][key]
+    )
+    return template.format(**values)
+
+
+def field_display(field: str, language: Language) -> str:
+    key = f"field.{field}"
+    translated = TEXT.get(language, {}).get(key) or TEXT[Language.EN].get(key)
+    return f"{field} ({translated})" if translated and translated != field else field
+
+
+def field_list_display(value: str, language: Language) -> str:
+    return ", ".join(field_display(item.strip(), language) for item in value.split(","))
+
+
+def localize_diagnostic(message: str, language: Language) -> str:
+    if language == Language.EN:
+        return message
+
+    source_match = re.fullmatch(r"(workers|equipment|environment|events): (.+)", message, re.DOTALL)
+    if source_match:
+        source, detail = source_match.groups()
+        return diagnostic_text(
+            language,
+            "source",
+            source=SOURCE_LABELS[language][source],
+            detail=localize_diagnostic(detail, language),
+        )
+
+    row_match = re.fullmatch(r"Row (\d+): (.+)", message, re.DOTALL)
+    if row_match:
+        row, detail = row_match.groups()
+        return diagnostic_text(
+            language, "row", row=row, detail=localize_diagnostic(detail, language)
+        )
+
+    malformed_row = re.fullmatch(
+        r"malformed CSV \((.+)\); row was rejected\.", message, re.DOTALL
+    )
+    if malformed_row:
+        return diagnostic_text(language, "malformed_row", error=malformed_row.group(1))
+    if message == "too many fields; row was rejected.":
+        return diagnostic_text(language, "too_many")
+
+    rejected_match = re.fullmatch(r"(.+); row was rejected\.", message, re.DOTALL)
+    if rejected_match:
+        reasons = []
+        for reason in rejected_match.group(1).split("; "):
+            invalid_time = re.fullmatch(r"invalid timestamp (.+)", reason)
+            missing = re.fullmatch(r"missing (.+)", reason)
+            if invalid_time:
+                reasons.append(
+                    diagnostic_text(language, "invalid_timestamp", value=invalid_time.group(1))
+                )
+            elif missing:
+                reasons.append(
+                    diagnostic_text(
+                        language,
+                        "missing",
+                        fields=field_list_display(missing.group(1), language),
+                    )
+                )
+            else:
+                reasons.append(reason)
+        return diagnostic_text(language, "rejected", reason="; ".join(reasons))
+
+    patterns = [
+        (r"Invalid numeric value for ([a-z_]+); stored as null\.", "invalid_numeric", lambda m: {"field": field_display(m.group(1), language)}),
+        (r"Missing zone_id; excluded from zone-based analysis\.", "missing_zone", lambda m: {"field": field_display("zone_id", language)}),
+        (r"Missing ([a-z_]+)\.", "missing_field", lambda m: {"field": field_display(m.group(1), language)}),
+        (r"Missing expected columns: (.+)\.", "missing_columns", lambda m: {"fields": field_list_display(m.group(1), language)}),
+        (r"malformed CSV \((.+)\); row was rejected\.", "malformed_row", lambda m: {"error": m.group(1)}),
+        (r"Malformed CSV: (.+)\.", "malformed_file", lambda m: {"error": m.group(1)}),
+        (r"File exceeds the (\d+) MB limit and was skipped\.", "too_large", lambda m: {"size": m.group(1)}),
+        (r"(\d+) time-only record\(s\) were excluded because the same analysis also contains dated timestamps; their calendar date cannot be grounded\.", "mixed_time", lambda m: {"count": m.group(1)}),
+    ]
+    for pattern, key, values in patterns:
+        match = re.fullmatch(pattern, message, re.DOTALL)
+        if match:
+            return diagnostic_text(language, key, **values(match))
+
+    exact = {
+        "duplicate row was excluded.": "duplicate",
+        "too many fields; row was rejected.": "too_many",
+        "File is empty.": "empty",
+        "File is not valid UTF-8 and was skipped.": "not_utf8",
+        "File contains a header but no data rows.": "header_only",
+        "Timestamps contain time only; the source date is unavailable. Records are compared within one shift and displayed without an inferred date.": "time_only",
+        "File was not provided.": "not_provided",
+    }
+    key = exact.get(message)
+    return diagnostic_text(language, key) if key else message
+
+
+def localize_diagnostics(messages: list[str], language: Language) -> list[str]:
+    return [localize_diagnostic(message, language) for message in messages]
 
 
 QA_TEXT: dict[Language, dict[str, str]] = {

@@ -26,14 +26,14 @@ def upload_sample_shift() -> dict:
 def test_sample_shift_detects_and_prioritizes_expected_risks() -> None:
     payload = upload_sample_shift()
     risks = payload["risks"]
-    assert len(risks) == 5
-    assert payload["overview"]["high_priority_risks"] == 4
+    assert len(risks) == 6
+    assert payload["overview"]["high_priority_risks"] == 5
     assert [risk["score"] for risk in risks] == sorted(
         (risk["score"] for risk in risks), reverse=True
     )
-    assert risks[0]["title"] == "High-severity recorded event"
+    assert risks[0]["title"] == "Compound zone risk escalation"
     assert risks[0]["priority"] == "CRITICAL"
-    assert risks[0]["score"] == 91
+    assert risks[0]["score"] == 95
     assert all(
         entity["type"] in {"worker", "equipment"}
         for risk in risks
@@ -42,6 +42,7 @@ def test_sample_shift_detects_and_prioritizes_expected_risks() -> None:
     assert any(risk["title"] == "Potential worker–vehicle conflict" for risk in risks)
     assert any(risk["title"] == "Adverse environmental conditions" for risk in risks)
     assert any(risk["title"] == "Abnormal equipment status" for risk in risks)
+    assert any(risk["title"] == "High-severity recorded event" for risk in risks)
 
 
 def test_every_risk_is_explainable_and_score_is_auditable() -> None:
@@ -52,6 +53,7 @@ def test_every_risk_is_explainable_and_score_is_auditable() -> None:
         assert risk["recommended_action"]
         assert risk["limitations"]
         assert risk["score"] == sum(risk["score_breakdown"].values())
+        assert len(risk["priority_reasons"]) == 5
         assert len({item["evidence_id"] for item in risk["observed_data"]}) == len(
             risk["observed_data"]
         )
@@ -65,7 +67,7 @@ def test_environment_risk_explains_worsening_recorded_trend() -> None:
         risk for risk in risks if risk["title"] == "Adverse environmental conditions"
     )
     assert "recorded trend" in environment_risk["interpretation"]
-    assert "gas_level increased from 4.2 to 12.8" in environment_risk["interpretation"]
+    assert "gas_level (gas level) increased from 4.2 to 12.8" in environment_risk["interpretation"]
     environment_rows = [
         evidence
         for evidence in environment_risk["observed_data"]
@@ -105,11 +107,11 @@ def test_risk_filters_support_operational_workflow() -> None:
         f"/api/analyses/{analysis_id}/risks", params={"entity_id": "W-001"}
     )
     assert critical.status_code == 200
-    assert len(critical.json()) == 1
+    assert len(critical.json()) == 2
     assert all(risk["priority"] == "CRITICAL" for risk in critical.json())
-    assert len(zone_b.json()) == 4
+    assert len(zone_b.json()) == 5
     assert all(risk["zone_id"] == "Zone B" for risk in zone_b.json())
-    assert len(worker.json()) == 4
+    assert len(worker.json()) == 5
 
 
 def test_risk_ids_are_stable_for_identical_source_data() -> None:
@@ -214,6 +216,26 @@ def test_numeric_event_severity_is_supported() -> None:
     risk = response.json()["risks"][0]
     assert risk["title"] == "High-severity recorded event"
     assert "recorded as critical" in risk["interpretation"]
+
+
+def test_safety_critical_event_type_is_detected_without_high_severity() -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "events": (
+                "events.csv",
+                BytesIO(
+                    b"event_id,timestamp,zone_id,event_type,severity,description\n"
+                    b"E-1,2026-09-19T15:21:00,Zone A,restricted_area_entry,medium,Entry recorded\n"
+                ),
+                "text/csv",
+            )
+        },
+    )
+    assert response.status_code == 201
+    risk = response.json()["risks"][0]
+    assert risk["title"] == "Recorded safety event requiring investigation"
+    assert "restricted_area_entry" in risk["interpretation"]
 
 
 def test_thresholds_are_visible_to_the_frontend() -> None:

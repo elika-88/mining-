@@ -48,9 +48,9 @@ def test_immediate_attention_question_returns_top_risk() -> None:
     analysis = create_analysis()
     payload = ask(analysis["analysis_id"], "Which risk requires immediate attention?")
     assert payload["answer_mode"] == "deterministic_fallback"
-    assert "High-severity recorded event" in payload["answer"]
+    assert "Compound zone risk escalation" in payload["answer"]
     assert "CRITICAL" in payload["answer"]
-    assert "score 91" in payload["answer"]
+    assert "score 95" in payload["answer"]
     assert payload["recommended_action"]
     assert_grounded(payload, analysis["analysis_id"])
 
@@ -58,7 +58,7 @@ def test_immediate_attention_question_returns_top_risk() -> None:
 def test_zone_question_combines_multiple_sources() -> None:
     analysis = create_analysis()
     payload = ask(analysis["analysis_id"], "Why is Zone B dangerous?")
-    assert "Zone B has 4 detected risk(s)" in payload["answer"]
+    assert "Zone B has 5 detected risk(s)" in payload["answer"]
     assert "Potential worker–vehicle conflict" in payload["answer"]
     evidence_ids = {
         evidence_id
@@ -197,7 +197,7 @@ def test_ai_api_failure_falls_back_to_deterministic_grounded_answer(monkeypatch)
     assert payload["answer_mode"] == "deterministic_fallback"
     assert payload["model_used"] is None
     assert payload["fallback_reason"] == "ai_not_configured"
-    assert "Zone B has 4 detected risk(s)" in payload["answer"]
+    assert "Zone B has 5 detected risk(s)" in payload["answer"]
     assert_grounded(payload, analysis["analysis_id"])
 
 
@@ -232,7 +232,7 @@ def test_openai_structured_route_is_used_without_generating_facts(monkeypatch) -
     assert payload["answer_mode"] == "llm_routed"
     assert payload["model_used"] == "test-model"
     assert payload["fallback_reason"] is None
-    assert "Zone B has 4 detected risk(s)" in payload["answer"]
+    assert "Zone B has 5 detected risk(s)" in payload["answer"]
     assert_grounded(payload, analysis["analysis_id"])
 
 

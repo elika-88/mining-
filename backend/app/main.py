@@ -25,7 +25,7 @@ from app.store.memory import StoredAnalysis, analysis_store
 
 app = FastAPI(
     title="Mine Safety Incident Prevention API",
-    version="0.6.0",
+    version="0.7.0",
     description=(
         "Mine-shift CSV ingestion and deterministic risk analysis API with row-level "
         "validation, evidence provenance, transparent scoring, and prioritized risks."
@@ -61,13 +61,12 @@ def require_analysis(analysis_id: str) -> StoredAnalysis:
 
 
 def ingestion_from_stored(stored: StoredAnalysis) -> IngestionResult:
-    previous = stored.response.overview
     return IngestionResult(
         records=list(stored.records),
-        files=previous.files,
-        received_records=previous.processing_summary.received_records,
-        rejected_records=previous.processing_summary.rejected_records,
-        warnings=previous.processing_summary.warnings,
+        files=list(stored.ingestion_files),
+        received_records=stored.received_records,
+        rejected_records=stored.rejected_records,
+        warnings=list(stored.ingestion_warnings),
     )
 
 
@@ -123,7 +122,7 @@ async def create_analysis(
         raise HTTPException(status_code=422, detail="At least one CSV file must be provided.")
     ingestion = await ingest_files(uploads)
     response, records = build_analysis(ingestion, language)
-    analysis_store.save(response, records)
+    analysis_store.save(response, records, ingestion)
     return response
 
 
@@ -135,10 +134,11 @@ async def create_analysis(
 )
 def localize_analysis(analysis_id: str, request: LanguageRequest) -> AnalysisResponse:
     stored = require_analysis(analysis_id)
+    ingestion = ingestion_from_stored(stored)
     response, records = build_analysis(
-        ingestion_from_stored(stored), request.language, analysis_id=analysis_id
+        ingestion, request.language, analysis_id=analysis_id
     )
-    analysis_store.save(response, records)
+    analysis_store.save(response, records, ingestion)
     return response
 
 
@@ -218,6 +218,10 @@ def ask_question(analysis_id: str, request: QuestionRequest) -> QuestionAnswer:
             response=localized_response,
             records=analysis.records,
             evidence=analysis.evidence,
+            ingestion_files=analysis.ingestion_files,
+            received_records=analysis.received_records,
+            rejected_records=analysis.rejected_records,
+            ingestion_warnings=analysis.ingestion_warnings,
         )
     return answer_question(
         request.question,

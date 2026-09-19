@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.models.normalized import NormalizedRecord
 from app.models.responses import GroundedFact, Language, QuestionAnswer, Risk
-from app.services.localization import qtr, tr
+from app.services.localization import field_display, qtr, tr
 from app.store.memory import StoredAnalysis
 
 
@@ -189,7 +189,7 @@ def evidence_statement(record: NormalizedRecord, language: Language) -> str:
     details = []
     for key, value in record.values.items():
         if value is not None and key not in {"worker_id", "equipment_id", "event_id", "zone_id"}:
-            details.append(f"{key}={value}")
+            details.append(f"{field_display(key, language)}={value}")
     subject = record.entity_id or record.record_type.rstrip("s")
     zone = qtr(language, "zone_suffix", zone=record.zone_id) if record.zone_id else ""
     return qtr(
@@ -212,7 +212,7 @@ def facts_from_risks(
                 continue
             seen.add(evidence.evidence_id)
             details = [
-                f"{key}={value}"
+                f"{field_display(key, language)}={value}"
                 for key, value in evidence.facts.items()
                 if value is not None and key != "zone_id"
             ]
@@ -486,7 +486,7 @@ def change_facts(
         for field in ("gas_level", "temperature", "visibility"):
             if first.values.get(field) != last.values.get(field):
                 changes.append(
-                    f"{tr(language, f'field.{field}')} "
+                    f"{field_display(field, language)} "
                     f"{first.values.get(field)} -> {last.values.get(field)}"
                 )
         if changes:

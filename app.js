@@ -32,7 +32,8 @@ const translations = {
     aiModel: "Model", aiRouted: "AI-routed", deterministicFallback: "Deterministic fallback", insufficientData: "Insufficient data",
     aiFallbackNotice: "AI provider unavailable; grounded fallback used.", printReport: "Print / Save PDF", exportJson: "Export JSON",
     timelineTitle: "Evidence timeline", timelineNotice: "Shows only observed records returned by the analysis; no movement path is inferred.", recentThirty: "Last 30 minutes",
-    noTimeline: "No observed records are available for the current filters.", qualityContractNote: "The current API exposes file-level warnings; rejected row details are not available to the frontend."
+    noTimeline: "No observed records are available for the current filters.", qualityContractNote: "The current API exposes file-level warnings; rejected row details are not available to the frontend.",
+    fileLabel: "File", receivedLabel: "Received", validLabel: "Valid", rejectedLabel: "Rejected", statusLabel: "Status", warningStatus: "Warning", warningsCount: "{count} warning(s)", priorityBasis: "Why this priority"
   },
   kk: {
     appTitle: "MineShift қауіпсіздік басқару панелі", awaitingShift: "Ауысым деректері күтілуде", filesReady: "{count} файл дайын",
@@ -67,7 +68,8 @@ const translations = {
     aiModel: "Модель", aiRouted: "AI бағыттады", deterministicFallback: "Детерминирленген резерв", insufficientData: "Дерек жеткіліксіз",
     aiFallbackNotice: "AI провайдері қолжетімсіз; деректерге негізделген резерв қолданылды.", printReport: "Басып шығару / PDF", exportJson: "JSON экспорттау",
     timelineTitle: "Дәлелдер уақыт сызығы", timelineNotice: "Тек талдаудан қайтарылған нақты жазбалар көрсетіледі; қозғалыс жолы болжанбайды.", recentThirty: "Соңғы 30 минут",
-    noTimeline: "Ағымдағы сүзгілер үшін бақылау жазбалары жоқ.", qualityContractNote: "API файл деңгейіндегі ескертулерді ғана береді; қабылданбаған жол деректері фронтендке берілмейді."
+    noTimeline: "Ағымдағы сүзгілер үшін бақылау жазбалары жоқ.", qualityContractNote: "API файл деңгейіндегі ескертулерді ғана береді; қабылданбаған жол деректері фронтендке берілмейді.",
+    fileLabel: "Файл", receivedLabel: "Қабылданды", validLabel: "Жарамды", rejectedLabel: "Қабылданбады", statusLabel: "Күй", warningStatus: "Ескерту", warningsCount: "{count} ескерту", priorityBasis: "Бұл басымдықтың себебі"
   },
   ru: {
     appTitle: "MineShift — консоль безопасности", awaitingShift: "Ожидание данных смены", filesReady: "Файлов готово: {count}",
@@ -102,7 +104,8 @@ const translations = {
     aiModel: "Модель", aiRouted: "AI-routed", deterministicFallback: "Детерминированный fallback", insufficientData: "Недостаточно данных",
     aiFallbackNotice: "AI provider недоступен; использован grounded fallback.", printReport: "Печать / Сохранить PDF", exportJson: "Экспорт JSON",
     timelineTitle: "Хронология доказательств", timelineNotice: "Показаны только фактические записи анализа; траектория движения не моделируется.", recentThirty: "Последние 30 минут",
-    noTimeline: "Для текущих фильтров нет наблюдаемых записей.", qualityContractNote: "API передаёт предупреждения на уровне файлов; детали отклонённых строк недоступны фронтенду."
+    noTimeline: "Для текущих фильтров нет наблюдаемых записей.", qualityContractNote: "API передаёт предупреждения на уровне файлов; детали отклонённых строк недоступны фронтенду.",
+    fileLabel: "Файл", receivedLabel: "Получено", validLabel: "Корректно", rejectedLabel: "Отклонено", statusLabel: "Статус", warningStatus: "Предупреждение", warningsCount: "Предупреждений: {count}", priorityBasis: "Почему назначен этот приоритет"
   },
   zh: {
     appTitle: "MineShift 矿山安全调度控制台", awaitingShift: "等待导入班次数据", filesReady: "已选择 {count} 个文件",
@@ -137,8 +140,16 @@ const translations = {
     aiModel: "模型", aiRouted: "AI 路由", deterministicFallback: "确定性降级", insufficientData: "数据不足",
     aiFallbackNotice: "AI 提供商不可用，已使用基于数据的降级回答。", printReport: "打印 / 保存为 PDF", exportJson: "导出 JSON",
     timelineTitle: "证据时间线", timelineNotice: "仅显示分析返回的真实观测记录，不推测人员或设备移动轨迹。", recentThirty: "最近 30 分钟",
-    noTimeline: "当前筛选条件下没有观测记录。", qualityContractNote: "当前 API 仅提供文件级警告；前端无法获得被拒绝行的结构化详情。"
+    noTimeline: "当前筛选条件下没有观测记录。", qualityContractNote: "当前 API 仅提供文件级警告；前端无法获得被拒绝行的结构化详情。",
+    fileLabel: "文件", receivedLabel: "接收", validLabel: "有效", rejectedLabel: "拒绝", statusLabel: "状态", warningStatus: "警告", warningsCount: "{count} 条警告", priorityBasis: "此优先级的依据"
   }
+};
+
+const fieldTranslations = {
+  en: { worker_id: "worker ID", equipment_id: "equipment ID", equipment_type: "equipment type", event_id: "event ID", timestamp: "timestamp", zone_id: "zone ID", status: "status", speed: "speed", gas_level: "gas level", temperature: "temperature", visibility: "visibility", event_type: "event type", severity: "severity", description: "description", source_timestamp: "source timestamp", timestamp_date_available: "timestamp date available", workers: "workers", equipment: "equipment", environment: "environment", events: "events", risk: "risk", worker: "worker", event: "event", corroboration: "corroboration", immediacy: "immediacy", exposure: "exposure", magnitude: "magnitude" },
+  kk: { worker_id: "жұмысшы ID-сі", equipment_id: "техника ID-сі", equipment_type: "техника түрі", event_id: "оқиға ID-сі", timestamp: "уақыт белгісі", zone_id: "аймақ ID-сі", status: "күй", speed: "жылдамдық", gas_level: "газ деңгейі", temperature: "температура", visibility: "көріну", event_type: "оқиға түрі", severity: "ауырлық", description: "сипаттама", source_timestamp: "бастапқы уақыт", timestamp_date_available: "күннің қолжетімділігі", workers: "жұмысшылар", equipment: "техника", environment: "қоршаған орта", events: "оқиғалар", risk: "қауіп", worker: "жұмысшы", event: "оқиға", corroboration: "растау", immediacy: "жеделдік", exposure: "әсер ету", magnitude: "ауқым" },
+  ru: { worker_id: "ID работника", equipment_id: "ID оборудования", equipment_type: "тип оборудования", event_id: "ID события", timestamp: "временная метка", zone_id: "ID зоны", status: "статус", speed: "скорость", gas_level: "уровень газа", temperature: "температура", visibility: "видимость", event_type: "тип события", severity: "тяжесть", description: "описание", source_timestamp: "исходное время", timestamp_date_available: "наличие даты", workers: "работники", equipment: "оборудование", environment: "окружающая среда", events: "события", risk: "риск", worker: "работник", event: "событие", corroboration: "подтверждение", immediacy: "срочность", exposure: "воздействие", magnitude: "масштаб" },
+  zh: { worker_id: "人员 ID", equipment_id: "设备 ID", equipment_type: "设备类型", event_id: "事件 ID", timestamp: "时间戳", zone_id: "区域 ID", status: "状态", speed: "速度", gas_level: "气体水平", temperature: "温度", visibility: "能见度", event_type: "事件类型", severity: "严重度", description: "描述", source_timestamp: "原始时间", timestamp_date_available: "日期可用性", workers: "人员", equipment: "设备", environment: "环境", events: "事件", risk: "风险", worker: "人员", event: "事件", corroboration: "多源佐证", immediacy: "紧迫性", exposure: "暴露度", magnitude: "幅度" }
 };
 
 const apiBase = window.MINE_API_BASE || ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : location.origin);
@@ -167,6 +178,11 @@ function text(key, values = {}) {
     value = value.replace(`{${name}}`, String(replacement));
   });
   return value;
+}
+
+function translatedFieldLabel(key) {
+  const translated = fieldTranslations[currentLanguage]?.[key] || fieldTranslations.en[key];
+  return translated && translated !== key ? `${key} (${translated})` : key;
 }
 
 function loadPreferences() {
@@ -557,18 +573,19 @@ function renderDataQuality() {
   tableWrap.className = "overflow-x-auto rounded-xl border border-line";
   const table = document.createElement("table");
   table.className = "w-full text-left text-xs";
-  table.innerHTML = "<thead class=\"bg-subtle text-subtext\"><tr><th class=\"px-3 py-2 font-medium\">File</th><th class=\"px-3 py-2 font-medium\">Received</th><th class=\"px-3 py-2 font-medium\">Valid</th><th class=\"px-3 py-2 font-medium\">Rejected</th><th class=\"px-3 py-2 font-medium\">Status</th></tr></thead>";
+  table.innerHTML = `<thead class="bg-subtle text-subtext"><tr><th class="px-3 py-2 font-medium">${escapeHtml(text("fileLabel"))}</th><th class="px-3 py-2 font-medium">${escapeHtml(text("receivedLabel"))}</th><th class="px-3 py-2 font-medium">${escapeHtml(text("validLabel"))}</th><th class="px-3 py-2 font-medium">${escapeHtml(text("rejectedLabel"))}</th><th class="px-3 py-2 font-medium">${escapeHtml(text("statusLabel"))}</th></tr></thead>`;
   const body = document.createElement("tbody");
   overview.files.forEach((file) => {
     const row = document.createElement("tr");
     row.className = "border-t border-line text-heavy";
-    const status = file.rejected_records || file.warnings.length ? "Warning" : "Valid";
-    row.innerHTML = `<td class="px-3 py-2 font-medium">${escapeHtml(file.source_file || file.file_type)}</td><td class="px-3 py-2 font-mono">${file.received_records}</td><td class="px-3 py-2 font-mono">${file.valid_records}</td><td class="px-3 py-2 font-mono ${file.rejected_records ? "text-rose-700" : ""}">${file.rejected_records}</td><td class="px-3 py-2"><span class="rounded-full px-2 py-0.5 ${status === "Warning" ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"}">${status}</span></td>`;
+    const hasWarning = Boolean(file.rejected_records || file.warnings.length);
+    const status = hasWarning ? text("warningStatus") : text("validLabel");
+    row.innerHTML = `<td class="px-3 py-2 font-medium">${escapeHtml(file.source_file || translatedFieldLabel(file.file_type))}</td><td class="px-3 py-2 font-mono">${file.received_records}</td><td class="px-3 py-2 font-mono">${file.valid_records}</td><td class="px-3 py-2 font-mono ${file.rejected_records ? "text-rose-700" : ""}">${file.rejected_records}</td><td class="px-3 py-2"><span class="rounded-full px-2 py-0.5 ${hasWarning ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"}">${escapeHtml(status)}</span></td>`;
     body.appendChild(row);
     if (file.warnings.length) {
       const warningRow = document.createElement("tr");
       warningRow.className = "border-t border-line";
-      warningRow.innerHTML = `<td colspan="5" class="px-3 py-2"><details><summary class="focus-ring cursor-pointer text-xs font-medium text-amber-800">${file.warnings.length} warning(s)</summary><div class="mt-2 grid gap-1 text-xs text-subtext">${file.warnings.map((warning) => `<div>${escapeHtml(warning)}</div>`).join("")}</div></details></td>`;
+      warningRow.innerHTML = `<td colspan="5" class="px-3 py-2"><details><summary class="focus-ring cursor-pointer text-xs font-medium text-amber-800">${escapeHtml(text("warningsCount", { count: file.warnings.length }))}</summary><div class="mt-2 grid gap-1 text-xs text-subtext">${file.warnings.map((warning) => `<div>${escapeHtml(warning)}</div>`).join("")}</div></details></td>`;
       body.appendChild(warningRow);
     }
   });
@@ -684,6 +701,7 @@ function renderSelectedRisk() {
     empty.querySelector("h3").textContent = currentAnalysis ? text("noRisksTitle") : text("noDataTitle");
     empty.querySelector("p").textContent = currentAnalysis ? text("noRiskCaution") : text("noDataDesc");
     document.getElementById("detailEntities").replaceChildren();
+    document.getElementById("priorityReasons").replaceChildren();
     document.getElementById("reportActions").classList.add("hidden");
     return;
   }
@@ -703,7 +721,7 @@ function renderSelectedRisk() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "focus-ring rounded-full border border-line bg-subtle px-3 py-1 text-[11px] font-medium text-heavy hover:border-neutral-300";
-    button.textContent = `${entity.type}: ${entity.id}`;
+    button.textContent = `${translatedFieldLabel(entity.type)}: ${entity.id}`;
     button.addEventListener("click", () => {
       entityFilter = entity.id;
       renderRiskCards();
@@ -725,6 +743,7 @@ function renderSelectedRisk() {
   document.getElementById("printButton").onclick = () => printRiskReport(risk);
   document.getElementById("jsonExportButton").onclick = () => exportRiskJson(risk);
   renderScoreBreakdown(risk.score_breakdown);
+  renderPriorityReasons(risk.priority_reasons || []);
   renderEvidence(risk);
 }
 
@@ -734,7 +753,17 @@ function renderScoreBreakdown(breakdown) {
   Object.entries(breakdown || {}).forEach(([label, value]) => {
     const item = document.createElement("div");
     item.className = "score-item";
-    item.innerHTML = `<span class="score-value">${escapeHtml(value)}</span><span class="score-label">${escapeHtml(label.replaceAll("_", " "))}</span>`;
+    item.innerHTML = `<span class="score-value">${escapeHtml(value)}</span><span class="score-label">${escapeHtml(translatedFieldLabel(label))}</span>`;
+    container.appendChild(item);
+  });
+}
+
+function renderPriorityReasons(reasons) {
+  const container = document.getElementById("priorityReasons");
+  container.replaceChildren();
+  reasons.forEach((reason) => {
+    const item = document.createElement("li");
+    item.textContent = reason;
     container.appendChild(item);
   });
 }
@@ -750,7 +779,7 @@ function renderEvidence(risk) {
   risk.observed_data.forEach((evidence) => {
     const row = document.createElement("div");
     row.className = "p-3.5 bg-subtle/70 rounded-xl text-xs";
-    const facts = Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · ");
+    const facts = Object.entries(evidence.facts).map(([key, value]) => `${translatedFieldLabel(key)}: ${value ?? "—"}`).join(" · ");
     const issues = evidence.validation_issues?.length
       ? `<div class="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-amber-800">${escapeHtml(evidence.validation_issues.join(" · "))}</div>`
       : "";
@@ -913,7 +942,7 @@ function createEvidenceDetail(evidenceId, evidence) {
     item.textContent = `${evidenceId} · ${text("evidenceUnavailable")}`;
     return item;
   }
-  const facts = Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · ");
+  const facts = Object.entries(evidence.facts).map(([key, value]) => `${translatedFieldLabel(key)}: ${value ?? "—"}`).join(" · ");
   item.innerHTML = `<div class="font-mono text-heavy">${escapeHtml(evidenceId)}</div><div class="mt-1">${formatDateTime(evidence.timestamp)} · ${escapeHtml(evidence.zone_id || "—")} · ${escapeHtml(evidence.source_file)} · ${text("row")} ${evidence.source_row}</div><div class="mt-1 text-heavy">${escapeHtml(facts)}</div>`;
   return item;
 }
@@ -941,7 +970,7 @@ function renderTimeline() {
         timestamp: evidence.timestamp,
         zone: evidence.zone_id,
         facts: evidence.facts,
-        label: Object.entries(evidence.facts).map(([key, value]) => `${key}: ${value ?? "—"}`).join(" · "),
+        label: Object.entries(evidence.facts).map(([key, value]) => `${translatedFieldLabel(key)}: ${value ?? "—"}`).join(" · "),
         riskId: risk.risk_id,
         priority: risk.priority,
         source: `${evidence.source_file}:${evidence.source_row}`
@@ -977,7 +1006,7 @@ function renderTimeline() {
     button.type = "button";
     const emphasized = entry.type === "risk" && ["CRITICAL", "HIGH"].includes(entry.priority);
     button.className = `focus-ring grid grid-cols-[88px_88px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border px-3.5 py-3 text-left text-xs ${emphasized ? "border-rose-100 bg-rose-50" : "border-line bg-subtle/50"}`;
-    button.innerHTML = `<span class="font-mono text-subtext">${formatDateTime(entry.timestamp)}</span><span class="font-medium text-heavy capitalize">${escapeHtml(entry.type)}</span><span class="min-w-0 break-words text-heavy">${escapeHtml(entry.label)}</span><span class="font-mono text-[11px] text-subtext">${escapeHtml(entry.source)}</span>`;
+    button.innerHTML = `<span class="font-mono text-subtext">${formatDateTime(entry.timestamp)}</span><span class="font-medium text-heavy capitalize">${escapeHtml(translatedFieldLabel(entry.type))}</span><span class="min-w-0 break-words text-heavy">${escapeHtml(entry.label)}</span><span class="font-mono text-[11px] text-subtext">${escapeHtml(entry.source)}</span>`;
     button.addEventListener("click", () => {
       selectedRiskId = entry.riskId;
       renderRiskCards();
@@ -1017,8 +1046,11 @@ function exportRiskJson(risk) {
 
 function printRiskReport(risk) {
   const report = buildRiskReport(risk);
-  const scoreRows = Object.entries(risk.score_breakdown).map(([key, value]) => `<tr><td>${escapeHtml(key)}</td><td>${value}</td></tr>`).join("");
-  const evidenceRows = risk.observed_data.map((evidence) => `<tr><td>${formatDateTime(evidence.timestamp)}</td><td>${escapeHtml(evidence.zone_id || "—")}</td><td>${escapeHtml(evidence.source_file)}:${evidence.source_row}</td><td>${escapeHtml(JSON.stringify(evidence.facts))}</td></tr>`).join("");
+  const scoreRows = Object.entries(risk.score_breakdown).map(([key, value]) => `<tr><td>${escapeHtml(translatedFieldLabel(key))}</td><td>${value}</td></tr>`).join("");
+  const evidenceRows = risk.observed_data.map((evidence) => {
+    const facts = Object.entries(evidence.facts).map(([key, value]) => `${translatedFieldLabel(key)}: ${value ?? "—"}`).join(" · ");
+    return `<tr><td>${formatDateTime(evidence.timestamp)}</td><td>${escapeHtml(evidence.zone_id || "—")}</td><td>${escapeHtml(evidence.source_file)}:${evidence.source_row}</td><td>${escapeHtml(facts)}</td></tr>`;
+  }).join("");
   const fileRows = report.data_coverage.map((file) => `<tr><td>${escapeHtml(file.source_file || file.file_type)}</td><td>${file.received_records}</td><td>${file.valid_records}</td><td>${file.rejected_records}</td></tr>`).join("");
   const metadata = report.analysis_metadata;
   const auditLine = metadata

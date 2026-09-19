@@ -9,12 +9,13 @@ MineShift processes the supplied shift CSV files during the demonstration, detec
 - Uploads any available combination of `workers.csv`, `equipment.csv`, `environment.csv`, and `events.csv`.
 - Isolates malformed rows so one bad record cannot crash an analysis.
 - Calculates the current-shift overview from the dataset's latest timestamp, not the server clock.
-- Detects severe events, worker–moving-equipment conflicts, adverse environmental readings, abnormal statuses, and telemetry inconsistencies.
-- Ranks every risk with an auditable 0–100 score and shows its score components.
+- Detects severe and safety-critical event types, worker–moving-equipment conflicts, adverse environmental readings, abnormal statuses, and telemetry inconsistencies.
+- Correlates three or more independent risk families into a compound zone escalation for coordinated investigation.
+- Ranks every risk with an auditable 0–100 score, score components, and explicit priority reasons.
 - Shows affected zone/entities, source rows, observed facts, interpretation, limitations, and recommended action.
 - Supports priority and zone filtering, four interface languages, re-analysis, and empty/no-risk states.
 - Answers top-risk, zone, entity, recent-change, overview, and evidence questions from the active analysis.
-- Reports accepted/rejected record counts and row-level data-quality warnings.
+- Reports accepted/rejected record counts and localized row-level data-quality warnings.
 
 ## Architecture
 
@@ -143,7 +144,7 @@ The bundled data is explicitly synthetic and is not organizer-provided mine data
 | `GET` | `/api/analyses/{analysis_id}/evidence/{evidence_id}` | Source evidence detail |
 | `POST` | `/api/analyses/{analysis_id}/questions` | Grounded natural-language answer; optional JSON `language` override |
 
-Language changes preserve the analysis ID, risk IDs, source evidence, and data fingerprint. Only system-generated risk titles, interpretations, recommendations, limitations, and answer explanations are localized; uploaded IDs, zones, timestamps, statuses, descriptions, and sensor values remain unchanged as source-of-truth evidence.
+Language changes preserve the analysis ID, risk IDs, source evidence, and data fingerprint. System-generated risk text, priority reasons, answer explanations, and data-quality diagnostics are localized. Uploaded IDs, zones, timestamps, statuses, descriptions, and sensor values remain unchanged as source-of-truth evidence; the UI shows original field keys followed by their translation.
 
 Frontend integration:
 

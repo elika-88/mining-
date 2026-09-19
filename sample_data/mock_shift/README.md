@@ -25,9 +25,9 @@ Expected ingestion result:
 
 Expected risk result:
 
-- 5 prioritized risks;
-- 4 HIGH or CRITICAL risks;
-- top risk: critical event `E-002`, score 91;
+- 6 prioritized risks;
+- 5 HIGH or CRITICAL risks;
+- top risk: compound Zone B escalation, score 95;
 - worker-equipment conflict involving `W-001` and `T-01`;
 - adverse Zone B environmental conditions;
 - abnormal maintenance status for `L-02`.

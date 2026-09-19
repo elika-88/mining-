@@ -46,7 +46,7 @@ def create_valid_analysis() -> dict:
 def test_health() -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "version": "0.6.0"}
+    assert response.json() == {"status": "ok", "version": "0.7.0"}
 
 
 def test_requires_at_least_one_file() -> None:
@@ -82,7 +82,7 @@ def test_valid_files_create_real_overview() -> None:
     assert overview["processing_summary"]["valid_records"] == 5
     assert overview["processing_summary"]["rejected_records"] == 0
     metadata = payload["metadata"]
-    assert metadata["engine_version"] == "0.6.0"
+    assert metadata["engine_version"] == "0.7.0"
     assert metadata["source_of_truth"] == "uploaded_csv"
     assert len(metadata["data_fingerprint"]) == 64
     assert metadata["thresholds"]["active_window_minutes"] == 30

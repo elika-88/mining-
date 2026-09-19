@@ -42,6 +42,7 @@ def test_frontend_exposes_ai_status_and_managed_uploads() -> None:
     assert 'id="clearFilesButton"' in html
     assert 'id="replaceFileInput"' in html
     assert 'id="detailLimitations"' in html
+    assert 'id="priorityReasons"' in html
     assert 'id="answerMode"' in html
     assert 'fetch(apiUrl("/api/config/ai")' in javascript
     assert "function removeFile" in javascript
@@ -51,6 +52,9 @@ def test_frontend_exposes_ai_status_and_managed_uploads() -> None:
     assert "function beginReplaceFile" in javascript
     assert "maxFileBytes" in javascript
     assert "answerModePresentation" in javascript
+    assert "translatedFieldLabel(key)" in javascript
+    assert "renderPriorityReasons" in javascript
+    assert '${translatedFieldLabel(key)}: ${value ?? "—"}' in javascript
 
 
 def test_frontend_sends_and_refreshes_analysis_language() -> None:

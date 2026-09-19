@@ -64,6 +64,7 @@ class Risk(ApiModel):
     recommended_action: str
     limitations: list[str]
     score_breakdown: ScoreBreakdown
+    priority_reasons: list[str] = Field(default_factory=list)
 
 
 class ProcessingSummary(ApiModel):

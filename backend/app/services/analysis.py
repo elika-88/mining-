@@ -14,6 +14,7 @@ from app.models.responses import (
     ProcessingSummary,
 )
 from app.services.ingestion import IngestionResult
+from app.services.localization import localize_diagnostics
 from app.services.risk_engine import detect_risks
 
 INACTIVE_WORKER_STATUSES = {"inactive", "off_shift", "off shift", "offline", "absent"}
@@ -24,7 +25,7 @@ INACTIVE_EQUIPMENT_STATUSES = {
     "out of service",
     "maintenance",
 }
-ENGINE_VERSION = "0.6.0"
+ENGINE_VERSION = "0.7.0"
 
 
 def latest_entity_records(records: list[NormalizedRecord], record_type: str) -> dict[str, NormalizedRecord]:
@@ -77,7 +78,7 @@ def build_analysis(
         received_records=ingestion.received_records,
         valid_records=len(ingestion.records),
         rejected_records=ingestion.rejected_records,
-        warnings=ingestion.warnings,
+        warnings=localize_diagnostics(ingestion.warnings, language),
     )
     overview = Overview(
         analysis_id=analysis_id,
@@ -91,7 +92,14 @@ def build_analysis(
             risk.priority in {Priority.HIGH, Priority.CRITICAL} for risk in risks
         ),
         processing_summary=summary,
-        files=ingestion.files,
+        files=[
+            file.model_copy(
+                update={
+                    "warnings": localize_diagnostics(file.warnings, language)
+                }
+            )
+            for file in ingestion.files
+        ],
     )
     fingerprint_material = "|".join(sorted(record.evidence_id for record in ingestion.records))
     metadata = AnalysisMetadata(

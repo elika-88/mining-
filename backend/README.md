@@ -47,13 +47,16 @@ analysis.
 Implemented risk families:
 
 - high-severity recorded events;
+- safety-critical event types even when their recorded severity is lower or missing;
 - worker and moving-equipment co-presence;
 - adverse environmental conditions;
 - abnormal worker or equipment status;
-- stopped-equipment telemetry inconsistencies.
+- stopped-equipment telemetry inconsistencies;
+- compound zone escalation when at least three independent risk families coincide.
 
 Every risk includes source rows, observed facts, interpretation, recommended action,
-limitations, affected entities, and a score breakdown.
+limitations, affected entities, a score breakdown, and localized priority reasons.
+Data-quality diagnostics are localized while raw source values and API field keys remain stable.
 
 ## Grounded AI assistant
 
