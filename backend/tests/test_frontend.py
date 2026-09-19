@@ -45,6 +45,9 @@ def test_frontend_exposes_ai_status_and_managed_uploads() -> None:
     assert 'id="answerMode"' in html
     assert 'fetch(apiUrl("/api/config/ai")' in javascript
     assert "function removeFile" in javascript
+    assert "payload.fallback_reason === \"ai_route_unavailable\"" in javascript
+    assert "currentAnalysis.metadata || null" in javascript
+    assert "payload.model_used" in javascript
     assert "function beginReplaceFile" in javascript
     assert "maxFileBytes" in javascript
     assert "answerModePresentation" in javascript

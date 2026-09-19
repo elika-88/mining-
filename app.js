@@ -28,7 +28,7 @@ const translations = {
     fileReplaced: "{name} replaced", incompleteCoverage: "Data coverage is incomplete; analysis may be limited.", fileTooLarge: "{name} exceeds the 10 MB limit.",
     nonCsvFile: "{name} is not a CSV file.", emptyFile: "Empty file", apiDisconnectedHelp: "Backend unavailable — start run.ps1 and retry.",
     backendTimeout: "Backend request timed out — retry or inspect the backend console.", noValidRecords: "No valid records — inspect rejected rows in Data Quality.",
-    noRiskCaution: "No detected risks — this does not prove the shift is safe.", aiChecking: "Checking AI", aiConnected: "AI connected", aiFallback: "AI fallback",
+    noRiskCaution: "No detected risks — this does not prove the shift is safe.", aiChecking: "Checking AI", aiConfigured: "AI configured", aiConnected: "AI routed", aiFallback: "AI fallback",
     aiModel: "Model", aiRouted: "AI-routed", deterministicFallback: "Deterministic fallback", insufficientData: "Insufficient data",
     aiFallbackNotice: "AI provider unavailable; grounded fallback used.", printReport: "Print / Save PDF", exportJson: "Export JSON",
     timelineTitle: "Evidence timeline", timelineNotice: "Shows only observed records returned by the analysis; no movement path is inferred.", recentThirty: "Last 30 minutes",
@@ -63,7 +63,7 @@ const translations = {
     fileReplaced: "{name} ауыстырылды", incompleteCoverage: "Деректер толық емес; талдау шектеулі болуы мүмкін.", fileTooLarge: "{name} 10 МБ шегінен асады.",
     nonCsvFile: "{name} CSV файлы емес.", emptyFile: "Бос файл", apiDisconnectedHelp: "Сервер қолжетімсіз — run.ps1 іске қосып, қайталаңыз.",
     backendTimeout: "Сервер сұрауының уақыты аяқталды — қайта көріңіз.", noValidRecords: "Жарамды жазба жоқ — Data Quality бөлімін тексеріңіз.",
-    noRiskCaution: "Қауіп анықталмады — бұл ауысым толық қауіпсіз екенін дәлелдемейді.", aiChecking: "AI тексерілуде", aiConnected: "AI қосылды", aiFallback: "AI резервтік режимде",
+    noRiskCaution: "Қауіп анықталмады — бұл ауысым толық қауіпсіз екенін дәлелдемейді.", aiChecking: "AI тексерілуде", aiConfigured: "AI бапталған", aiConnected: "AI бағыттады", aiFallback: "AI резервтік режимде",
     aiModel: "Модель", aiRouted: "AI бағыттады", deterministicFallback: "Детерминирленген резерв", insufficientData: "Дерек жеткіліксіз",
     aiFallbackNotice: "AI провайдері қолжетімсіз; деректерге негізделген резерв қолданылды.", printReport: "Басып шығару / PDF", exportJson: "JSON экспорттау",
     timelineTitle: "Дәлелдер уақыт сызығы", timelineNotice: "Тек талдаудан қайтарылған нақты жазбалар көрсетіледі; қозғалыс жолы болжанбайды.", recentThirty: "Соңғы 30 минут",
@@ -98,7 +98,7 @@ const translations = {
     fileReplaced: "{name} заменён", incompleteCoverage: "Покрытие данных неполное; анализ может быть ограничен.", fileTooLarge: "{name} превышает лимит 10 МБ.",
     nonCsvFile: "{name} не является CSV-файлом.", emptyFile: "Пустой файл", apiDisconnectedHelp: "Backend недоступен — запустите run.ps1 и повторите.",
     backendTimeout: "Истекло время ожидания backend — повторите запрос.", noValidRecords: "Нет корректных записей — проверьте Data Quality.",
-    noRiskCaution: "Риски не обнаружены — это не доказывает безопасность смены.", aiChecking: "Проверка AI", aiConnected: "AI подключён", aiFallback: "AI fallback",
+    noRiskCaution: "Риски не обнаружены — это не доказывает безопасность смены.", aiChecking: "Проверка AI", aiConfigured: "AI настроен", aiConnected: "AI маршрутизировал", aiFallback: "AI fallback",
     aiModel: "Модель", aiRouted: "AI-routed", deterministicFallback: "Детерминированный fallback", insufficientData: "Недостаточно данных",
     aiFallbackNotice: "AI provider недоступен; использован grounded fallback.", printReport: "Печать / Сохранить PDF", exportJson: "Экспорт JSON",
     timelineTitle: "Хронология доказательств", timelineNotice: "Показаны только фактические записи анализа; траектория движения не моделируется.", recentThirty: "Последние 30 минут",
@@ -133,7 +133,7 @@ const translations = {
     fileReplaced: "已替换 {name}", incompleteCoverage: "数据覆盖不完整，分析结果可能有限。", fileTooLarge: "{name} 超过 10 MB 限制。",
     nonCsvFile: "{name} 不是 CSV 文件。", emptyFile: "空文件", apiDisconnectedHelp: "后端不可用——请启动 run.ps1 后重试。",
     backendTimeout: "后端请求超时——请重试或检查后端控制台。", noValidRecords: "没有有效记录——请在数据质量面板检查被拒绝的行。",
-    noRiskCaution: "未检测到风险——这并不能证明当前班次绝对安全。", aiChecking: "正在检查 AI", aiConnected: "AI 已连接", aiFallback: "AI 降级模式",
+    noRiskCaution: "未检测到风险——这并不能证明当前班次绝对安全。", aiChecking: "正在检查 AI", aiConfigured: "AI 已配置", aiConnected: "AI 已路由", aiFallback: "AI 降级模式",
     aiModel: "模型", aiRouted: "AI 路由", deterministicFallback: "确定性降级", insufficientData: "数据不足",
     aiFallbackNotice: "AI 提供商不可用，已使用基于数据的降级回答。", printReport: "打印 / 保存为 PDF", exportJson: "导出 JSON",
     timelineTitle: "证据时间线", timelineNotice: "仅显示分析返回的真实观测记录，不推测人员或设备移动轨迹。", recentThirty: "最近 30 分钟",
@@ -155,6 +155,8 @@ let zoneFilter = storedPreferences.zoneFilter || "all";
 let entityFilter = null;
 let apiConnected = null;
 let aiConfig = null;
+let lastAnswerMode = null;
+let lastFallbackReason = null;
 let riskThresholds = null;
 let replaceTarget = null;
 let isAnalyzing = false;
@@ -231,13 +233,21 @@ function updateAiStatus() {
     status.className = "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-subtext border border-line";
     return;
   }
-  const connected = Boolean(apiConnected && aiConfig?.configured);
+  const configured = Boolean(apiConnected && aiConfig?.configured);
+  const routed = configured && lastAnswerMode === "llm_routed";
+  const fallback = !configured || lastFallbackReason === "ai_route_unavailable";
   const model = aiConfig?.model ? ` · ${aiConfig.model}` : "";
-  status.textContent = connected ? `${text("aiConnected")}${model}` : `${text("aiFallback")}${model}`;
+  status.textContent = routed
+    ? `${text("aiConnected")}${model}`
+    : fallback
+      ? `${text("aiFallback")}${model}`
+      : `${text("aiConfigured")}${model}`;
   status.title = aiConfig?.model ? `${text("aiModel")}: ${aiConfig.model}` : text("aiFallbackNotice");
-  status.className = connected
+  status.className = routed
     ? "ai-connected min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium"
-    : "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100";
+    : fallback
+      ? "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100"
+      : "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-800 border border-sky-100";
 }
 
 function changeLanguage(language) {
@@ -429,7 +439,10 @@ async function triggerAnalyze() {
     zoneFilter = "all";
     entityFilter = null;
     apiConnected = true;
+    lastAnswerMode = payload.answer_mode;
+    lastFallbackReason = payload.fallback_reason;
     updateApiStatus();
+    updateAiStatus();
     document.getElementById("answerBox").classList.add("hidden");
     renderAnalysis();
   } catch (error) {
@@ -795,7 +808,7 @@ async function submitCustomQuery() {
     const mode = answerModePresentation(payload);
     answerMode.textContent = mode.label;
     answerMode.className = mode.classes;
-    if (payload.answer_mode === "deterministic_fallback" && aiConfig?.configured) sections.push(text("aiFallbackNotice"));
+    if (payload.fallback_reason === "ai_route_unavailable") sections.push(text("aiFallbackNotice"));
     if (payload.limitations?.length) sections.push(`${text("limitations")}: ${payload.limitations.join(" · ")}`);
     answerContent.textContent = sections.join("\n\n");
     await renderQuestionEvidence(payload.observed_facts || []);
@@ -817,7 +830,8 @@ function answerModePresentation(payload) {
     return { label: text("insufficientData"), classes: "rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[11px] text-amber-800 font-medium" };
   }
   if (payload.answer_mode === "llm_routed") {
-    return { label: text("aiRouted"), classes: "ai-mode rounded-full border px-2.5 py-1 text-[11px] font-medium" };
+    const model = payload.model_used ? ` · ${payload.model_used}` : "";
+    return { label: `${text("aiRouted")}${model}`, classes: "ai-mode rounded-full border px-2.5 py-1 text-[11px] font-medium" };
   }
   return { label: text("deterministicFallback"), classes: "rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] text-subtext font-medium" };
 }
@@ -947,6 +961,7 @@ function buildRiskReport(risk) {
   const overview = currentAnalysis.overview;
   return {
     analysis_id: currentAnalysis.analysis_id,
+    analysis_metadata: currentAnalysis.metadata || null,
     generated_at: new Date().toISOString(),
     data_coverage: overview.files,
     overview,
@@ -974,10 +989,14 @@ function printRiskReport(risk) {
   const scoreRows = Object.entries(risk.score_breakdown).map(([key, value]) => `<tr><td>${escapeHtml(key)}</td><td>${value}</td></tr>`).join("");
   const evidenceRows = risk.observed_data.map((evidence) => `<tr><td>${formatDateTime(evidence.timestamp)}</td><td>${escapeHtml(evidence.zone_id || "—")}</td><td>${escapeHtml(evidence.source_file)}:${evidence.source_row}</td><td>${escapeHtml(JSON.stringify(evidence.facts))}</td></tr>`).join("");
   const fileRows = report.data_coverage.map((file) => `<tr><td>${escapeHtml(file.source_file || file.file_type)}</td><td>${file.received_records}</td><td>${file.valid_records}</td><td>${file.rejected_records}</td></tr>`).join("");
+  const metadata = report.analysis_metadata;
+  const auditLine = metadata
+    ? `${escapeHtml(metadata.engine_version)} · ${escapeHtml(metadata.source_of_truth)} · ${escapeHtml(metadata.data_fingerprint)}`
+    : "—";
   const printWindow = window.open("", "_blank");
   if (!printWindow) return;
   printWindow.opener = null;
-  printWindow.document.write(`<!doctype html><html><head><title>${escapeHtml(risk.risk_id)}</title><style>body{font:14px Arial,sans-serif;color:#111;margin:32px}h1{font-size:24px}h2{font-size:16px;margin-top:24px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ddd;padding:8px;text-align:left;vertical-align:top}.meta{color:#555}.action{background:#fff8e8;padding:12px;border:1px solid #ead9b7}.limits{background:#fffbea;padding:12px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">${escapeHtml(text("printReport"))}</button><h1>${escapeHtml(risk.title)}</h1><p class="meta">${escapeHtml(report.analysis_id)} · ${escapeHtml(report.generated_at)} · ${escapeHtml(risk.priority)} · ${risk.score}/100</p><p>${escapeHtml(risk.zone_id || "—")} · ${escapeHtml(risk.affected_entities.map((entity) => `${entity.type}: ${entity.id}`).join(" · "))}</p><h2>Data coverage</h2><table><tr><th>File</th><th>Received</th><th>Valid</th><th>Rejected</th></tr>${fileRows}</table><h2>${escapeHtml(text("evidenceHeader"))}</h2><table><tr><th>Time</th><th>Zone</th><th>Source</th><th>Observed values</th></tr>${evidenceRows}</table><h2>${escapeHtml(text("analysisReasoning"))}</h2><p>${escapeHtml(risk.interpretation)}</p><h2>${escapeHtml(text("recommendedProtocol"))}</h2><p class="action">${escapeHtml(risk.recommended_action)}</p><h2>${escapeHtml(text("limitations"))}</h2><div class="limits">${risk.limitations.map((item) => `<p>${escapeHtml(item)}</p>`).join("")}</div><h2>${escapeHtml(text("scoreBreakdown"))}</h2><table>${scoreRows}</table><h2>Thresholds</h2><pre>${escapeHtml(JSON.stringify(riskThresholds, null, 2))}</pre></body></html>`);
+  printWindow.document.write(`<!doctype html><html><head><title>${escapeHtml(risk.risk_id)}</title><style>body{font:14px Arial,sans-serif;color:#111;margin:32px}h1{font-size:24px}h2{font-size:16px;margin-top:24px}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border:1px solid #ddd;padding:8px;text-align:left;vertical-align:top}.meta{color:#555;overflow-wrap:anywhere}.action{background:#fff8e8;padding:12px;border:1px solid #ead9b7}.limits{background:#fffbea;padding:12px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">${escapeHtml(text("printReport"))}</button><h1>${escapeHtml(risk.title)}</h1><p class="meta">${escapeHtml(report.analysis_id)} · ${escapeHtml(report.generated_at)} · ${escapeHtml(risk.priority)} · ${risk.score}/100</p><p class="meta">Engine / source / SHA-256: ${auditLine}</p><p>${escapeHtml(risk.zone_id || "—")} · ${escapeHtml(risk.affected_entities.map((entity) => `${entity.type}: ${entity.id}`).join(" · "))}</p><h2>Data coverage</h2><table><tr><th>File</th><th>Received</th><th>Valid</th><th>Rejected</th></tr>${fileRows}</table><h2>${escapeHtml(text("evidenceHeader"))}</h2><table><tr><th>Time</th><th>Zone</th><th>Source</th><th>Observed values</th></tr>${evidenceRows}</table><h2>${escapeHtml(text("analysisReasoning"))}</h2><p>${escapeHtml(risk.interpretation)}</p><h2>${escapeHtml(text("recommendedProtocol"))}</h2><p class="action">${escapeHtml(risk.recommended_action)}</p><h2>${escapeHtml(text("limitations"))}</h2><div class="limits">${risk.limitations.map((item) => `<p>${escapeHtml(item)}</p>`).join("")}</div><h2>${escapeHtml(text("scoreBreakdown"))}</h2><table>${scoreRows}</table><h2>Thresholds</h2><pre>${escapeHtml(JSON.stringify(metadata?.thresholds || riskThresholds, null, 2))}</pre></body></html>`);
   printWindow.document.close();
   printWindow.focus();
 }
