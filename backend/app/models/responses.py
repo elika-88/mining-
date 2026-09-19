@@ -15,6 +15,13 @@ class Priority(StrEnum):
     LOW = "LOW"
 
 
+class Language(StrEnum):
+    EN = "en"
+    KK = "kk"
+    RU = "ru"
+    ZH = "zh"
+
+
 class EntityType(StrEnum):
     WORKER = "worker"
     EQUIPMENT = "equipment"
@@ -103,6 +110,7 @@ class GroundedFact(ApiModel):
 
 class QuestionAnswer(ApiModel):
     question: str
+    language: Language = Language.EN
     answer: str
     answer_mode: str
     model_used: str | None = None
@@ -115,6 +123,7 @@ class QuestionAnswer(ApiModel):
 
 class AnalysisResponse(ApiModel):
     analysis_id: str
+    language: Language = Language.EN
     overview: Overview
     risks: list[Risk]
     metadata: AnalysisMetadata
@@ -122,6 +131,11 @@ class AnalysisResponse(ApiModel):
 
 class QuestionRequest(ApiModel):
     question: str = Field(min_length=1, max_length=1000)
+    language: Language | None = None
     risk_id: str | None = None
     zone_id: str | None = None
     entity_id: str | None = None
+
+
+class LanguageRequest(ApiModel):
+    language: Language

@@ -3,13 +3,15 @@ from dataclasses import asdict
 from typing import Annotated
 from urllib.parse import urlsplit, urlunsplit
 
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile, status
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import THRESHOLDS
 from app.models.responses import (
     AnalysisResponse,
     Evidence,
+    Language,
+    LanguageRequest,
     Overview,
     Priority,
     QuestionAnswer,
@@ -17,7 +19,7 @@ from app.models.responses import (
     Risk,
 )
 from app.services.analysis import build_analysis
-from app.services.ingestion import ingest_files
+from app.services.ingestion import IngestionResult, ingest_files
 from app.services.qa import answer_question
 from app.store.memory import StoredAnalysis, analysis_store
 
@@ -56,6 +58,17 @@ def require_analysis(analysis_id: str) -> StoredAnalysis:
     if analysis is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return analysis
+
+
+def ingestion_from_stored(stored: StoredAnalysis) -> IngestionResult:
+    previous = stored.response.overview
+    return IngestionResult(
+        records=list(stored.records),
+        files=previous.files,
+        received_records=previous.processing_summary.received_records,
+        rejected_records=previous.processing_summary.rejected_records,
+        warnings=previous.processing_summary.warnings,
+    )
 
 
 @app.get("/api/health", tags=["system"])
@@ -98,6 +111,7 @@ async def create_analysis(
     equipment: Annotated[UploadFile | None, File()] = None,
     environment: Annotated[UploadFile | None, File()] = None,
     events: Annotated[UploadFile | None, File()] = None,
+    language: Annotated[Language, Form()] = Language.EN,
 ) -> AnalysisResponse:
     uploads = {
         "workers": workers,
@@ -108,7 +122,22 @@ async def create_analysis(
     if not any(uploads.values()):
         raise HTTPException(status_code=422, detail="At least one CSV file must be provided.")
     ingestion = await ingest_files(uploads)
-    response, records = build_analysis(ingestion)
+    response, records = build_analysis(ingestion, language)
+    analysis_store.save(response, records)
+    return response
+
+
+@app.post(
+    "/api/analyses/{analysis_id}/localize",
+    response_model=AnalysisResponse,
+    tags=["analysis"],
+    summary="Rebuild an analysis in another supported language",
+)
+def localize_analysis(analysis_id: str, request: LanguageRequest) -> AnalysisResponse:
+    stored = require_analysis(analysis_id)
+    response, records = build_analysis(
+        ingestion_from_stored(stored), request.language, analysis_id=analysis_id
+    )
     analysis_store.save(response, records)
     return response
 
@@ -180,9 +209,20 @@ def get_evidence(analysis_id: str, evidence_id: str) -> Evidence:
 )
 def ask_question(analysis_id: str, request: QuestionRequest) -> QuestionAnswer:
     analysis = require_analysis(analysis_id)
+    language = request.language or analysis.response.language
+    if language != analysis.response.language:
+        localized_response, _ = build_analysis(
+            ingestion_from_stored(analysis), language, analysis_id=analysis_id
+        )
+        analysis = StoredAnalysis(
+            response=localized_response,
+            records=analysis.records,
+            evidence=analysis.evidence,
+        )
     return answer_question(
         request.question,
         analysis,
+        language=language,
         risk_id=request.risk_id,
         zone_id=request.zone_id,
         entity_id=request.entity_id,

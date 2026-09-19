@@ -8,10 +8,12 @@ from app.models.responses import (
     AffectedEntity,
     EntityType,
     Evidence,
+    Language,
     Priority,
     Risk,
     ScoreBreakdown,
 )
+from app.services.localization import tr
 
 HIGH_EVENT_SEVERITIES = {"high", "critical", "severe", "emergency"}
 CRITICAL_EVENT_SEVERITIES = {"critical", "emergency"}
@@ -200,7 +202,7 @@ def affected_from_context(records: list[NormalizedRecord]) -> list[AffectedEntit
 
 
 def detect_event_risks(
-    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds
+    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds, language: Language
 ) -> list[Risk]:
     risks: list[Risk] = []
     for event in records:
@@ -223,22 +225,22 @@ def detect_event_risks(
         risks.append(
             make_risk(
                 rule="high_severity_event",
-                title="High-severity recorded event",
+                title=tr(language, "risk.event.title"),
                 zone_id=event.zone_id,
                 detected_at=event.timestamp,
                 entities=affected,
                 records=[event, *context],
-                interpretation=(
-                    f"Event {event.entity_id} is recorded as {severity_value} with type "
-                    f"{event_type}. Nearby records are included as context, not proof of causation."
+                interpretation=tr(
+                    language,
+                    "risk.event.interpretation",
+                    event_id=event.entity_id,
+                    severity=severity_value,
+                    event_type=event_type,
                 ),
-                recommended_action=(
-                    "Verify the recorded event, contact the responsible zone supervisor, and follow "
-                    "the site's escalation procedure."
-                ),
+                recommended_action=tr(language, "risk.event.action"),
                 limitations=[
-                    "The event record does not prove its root cause.",
-                    "Nearby entities are time-and-zone context only; precise distance is unavailable.",
+                    tr(language, "risk.event.limit.cause"),
+                    tr(language, "risk.event.limit.context"),
                 ],
                 severity=severity_score,
                 immediacy=immediacy_score(event.timestamp, dataset_now),
@@ -251,7 +253,7 @@ def detect_event_risks(
 
 
 def detect_worker_equipment_conflicts(
-    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds
+    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds, language: Language
 ) -> list[Risk]:
     cutoff = dataset_now - timedelta(minutes=thresholds.active_window_minutes)
     workers = [
@@ -289,24 +291,30 @@ def detect_worker_equipment_conflicts(
             risks.append(
                 make_risk(
                     rule="worker_equipment_conflict",
-                    title="Potential worker–vehicle conflict",
+                    title=tr(language, "risk.conflict.title"),
                     zone_id=worker.zone_id,
                     detected_at=detected_at,
                     entities=affected_from_context([worker, machine]),
                     records=[worker, machine, *context],
-                    interpretation=(
-                        f"Worker {worker.entity_id} and moving equipment {machine.entity_id} were "
-                        f"recorded in {worker.zone_id} within {thresholds.co_presence_minutes:g} minutes. "
-                        f"The recorded equipment speed value is {machine.values['speed']}."
+                    interpretation=tr(
+                        language,
+                        "risk.conflict.interpretation",
+                        worker_id=worker.entity_id,
+                        equipment_id=machine.entity_id,
+                        zone_id=worker.zone_id,
+                        minutes=f"{thresholds.co_presence_minutes:g}",
+                        speed=machine.values["speed"],
                     ),
-                    recommended_action=(
-                        f"Verify the current positions of {worker.entity_id} and {machine.entity_id}, "
-                        "contact the zone coordinator, and apply the site's traffic-control procedure."
+                    recommended_action=tr(
+                        language,
+                        "risk.conflict.action",
+                        worker_id=worker.entity_id,
+                        equipment_id=machine.entity_id,
                     ),
                     limitations=[
-                        "The dataset contains zones but no precise coordinates or physical distance.",
-                        "The speed unit and site speed limit are not provided.",
-                        "Co-presence indicates potential conflict, not a confirmed near miss.",
+                        tr(language, "risk.conflict.limit.coordinates"),
+                        tr(language, "risk.conflict.limit.speed"),
+                        tr(language, "risk.conflict.limit.inference"),
                     ],
                     severity=25,
                     immediacy=immediacy_score(detected_at, dataset_now),
@@ -350,13 +358,15 @@ def environmental_conditions(
     return conditions
 
 
-def environmental_trends(records: list[NormalizedRecord]) -> tuple[list[str], list[NormalizedRecord]]:
+def environmental_trends(
+    records: list[NormalizedRecord], language: Language
+) -> tuple[list[str], list[NormalizedRecord]]:
     if len(records) < 2:
         return [], []
     ordered = sorted(records, key=lambda record: (record.timestamp, record.source_row))
     first, last = ordered[0], ordered[-1]
     trends: list[str] = []
-    for field, direction in (("gas_level", "increased"), ("temperature", "increased")):
+    for field in ("gas_level", "temperature"):
         first_value = first.values.get(field)
         last_value = last.values.get(field)
         if (
@@ -364,7 +374,15 @@ def environmental_trends(records: list[NormalizedRecord]) -> tuple[list[str], li
             and isinstance(last_value, (int, float))
             and last_value > first_value
         ):
-            trends.append(f"{field} {direction} from {first_value:g} to {last_value:g}")
+            trends.append(
+                tr(
+                    language,
+                    "trend.increased",
+                    field=tr(language, f"field.{field}"),
+                    first=f"{first_value:g}",
+                    last=f"{last_value:g}",
+                )
+            )
     first_visibility = first.values.get("visibility")
     last_visibility = last.values.get("visibility")
     if (
@@ -372,12 +390,20 @@ def environmental_trends(records: list[NormalizedRecord]) -> tuple[list[str], li
         and isinstance(last_visibility, (int, float))
         and last_visibility < first_visibility
     ):
-        trends.append(f"visibility decreased from {first_visibility:g} to {last_visibility:g}")
+        trends.append(
+            tr(
+                language,
+                "trend.decreased",
+                field=tr(language, "field.visibility"),
+                first=f"{first_visibility:g}",
+                last=f"{last_visibility:g}",
+            )
+        )
     return trends, ordered if trends else []
 
 
 def detect_environment_risks(
-    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds
+    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds, language: Language
 ) -> list[Risk]:
     cutoff = dataset_now - timedelta(minutes=thresholds.active_window_minutes)
     records_by_zone: dict[str, list[NormalizedRecord]] = {}
@@ -396,7 +422,7 @@ def detect_environment_risks(
         conditions = environmental_conditions(environment, thresholds)
         if not conditions:
             continue
-        trends, trend_records = environmental_trends(zone_records)
+        trends, trend_records = environmental_trends(zone_records, language)
         context = records_near(
             records,
             zone_id=zone_id,
@@ -406,30 +432,38 @@ def detect_environment_risks(
         )
         critical = any(item[4] for item in conditions)
         descriptions = [
-            f"{name} {value:g} {operator} configured warning threshold {threshold:g}"
+            tr(
+                language,
+                "risk.environment.condition",
+                name=tr(language, f"field.{name}"),
+                value=f"{value:g}",
+                operator=operator,
+                threshold=f"{threshold:g}",
+            )
             for name, value, operator, threshold, _ in conditions
         ]
         if trends:
-            descriptions.append("recorded trend: " + "; ".join(trends))
+            descriptions.append(
+                tr(language, "risk.environment.trend", details="; ".join(trends))
+            )
         source_types = {"environment", *(record.record_type for record in context)}
         entities = affected_from_context(context)
         risks.append(
             make_risk(
                 rule="environment_anomaly",
-                title="Adverse environmental conditions",
+                title=tr(language, "risk.environment.title"),
                 zone_id=zone_id,
                 detected_at=environment.timestamp,
                 entities=entities,
                 records=[environment, *trend_records, *context],
-                interpretation="; ".join(descriptions) + ".",
-                recommended_action=(
-                    "Verify the environmental sensor readings, restrict exposure if required by "
-                    "site procedure, and notify the zone safety lead."
+                interpretation=tr(
+                    language, "risk.environment.interpretation", details="; ".join(descriptions)
                 ),
+                recommended_action=tr(language, "risk.environment.action"),
                 limitations=[
-                    "The dataset does not provide sensor units or official site thresholds.",
-                    "Thresholds are configurable prototype policy values, not regulatory limits.",
-                    "A sensor reading alone does not establish the root cause.",
+                    tr(language, "risk.environment.limit.units"),
+                    tr(language, "risk.environment.limit.thresholds"),
+                    tr(language, "risk.environment.limit.cause"),
                 ],
                 severity=38 if critical else 30 if len(conditions) >= 2 else 24,
                 immediacy=immediacy_score(environment.timestamp, dataset_now),
@@ -442,7 +476,7 @@ def detect_environment_risks(
 
 
 def detect_status_risks(
-    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds
+    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds, language: Language
 ) -> list[Risk]:
     cutoff = dataset_now - timedelta(minutes=thresholds.active_window_minutes)
     candidates = [
@@ -467,25 +501,32 @@ def detect_status_risks(
             types={"events", "environment"},
         )
         entity_kind = "worker" if record.record_type == "workers" else "equipment"
+        localized_entity_kind = tr(language, f"entity.{entity_kind}")
         urgent = status_value in {"emergency", "injured", "distress", "missing", "fault"}
         risks.append(
             make_risk(
                 rule=f"abnormal_{entity_kind}_status",
-                title=f"Abnormal {entity_kind} status",
+                title=tr(language, "risk.status.title", entity_kind=localized_entity_kind),
                 zone_id=record.zone_id,
                 detected_at=record.timestamp,
                 entities=affected_from_context([record]),
                 records=[record, *context],
-                interpretation=(
-                    f"{entity_kind.capitalize()} {record.entity_id} has recorded status "
-                    f"'{record.values.get('status')}'."
+                interpretation=tr(
+                    language,
+                    "risk.status.interpretation",
+                    entity_kind=localized_entity_kind,
+                    entity_kind_title=tr(language, f"entity.{entity_kind}.title"),
+                    entity_id=record.entity_id,
+                    status=record.values.get("status"),
                 ),
-                recommended_action=(
-                    f"Verify {record.entity_id}'s current condition and follow the site's "
-                    f"{entity_kind} response procedure."
+                recommended_action=tr(
+                    language,
+                    "risk.status.action",
+                    entity_id=record.entity_id,
+                    entity_kind=localized_entity_kind,
                 ),
                 limitations=[
-                    "The status label is observed data; its cause is not available in the dataset."
+                    tr(language, "risk.status.limit")
                 ],
                 severity=35 if urgent else 20,
                 immediacy=immediacy_score(record.timestamp, dataset_now),
@@ -498,7 +539,7 @@ def detect_status_risks(
 
 
 def detect_telemetry_inconsistencies(
-    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds
+    records: list[NormalizedRecord], dataset_now: datetime, thresholds: RiskThresholds, language: Language
 ) -> list[Risk]:
     cutoff = dataset_now - timedelta(minutes=thresholds.active_window_minutes)
     risks: list[Risk] = []
@@ -514,21 +555,21 @@ def detect_telemetry_inconsistencies(
         risks.append(
             make_risk(
                 rule="telemetry_inconsistency",
-                title="Equipment telemetry inconsistency",
+                title=tr(language, "risk.telemetry.title"),
                 zone_id=equipment.zone_id,
                 detected_at=equipment.timestamp,
                 entities=affected_from_context([equipment]),
                 records=[equipment],
-                interpretation=(
-                    f"Equipment {equipment.entity_id} is recorded with status "
-                    f"'{equipment.values.get('status')}' and speed value {speed}."
+                interpretation=tr(
+                    language,
+                    "risk.telemetry.interpretation",
+                    entity_id=equipment.entity_id,
+                    status=equipment.values.get("status"),
+                    speed=speed,
                 ),
-                recommended_action=(
-                    "Verify equipment state and telemetry integrity before using this record for "
-                    "operational decisions."
-                ),
+                recommended_action=tr(language, "risk.telemetry.action"),
                 limitations=[
-                    "The record may indicate a telemetry issue or a status timing mismatch; the cause is unknown."
+                    tr(language, "risk.telemetry.limit")
                 ],
                 severity=18,
                 immediacy=immediacy_score(equipment.timestamp, dataset_now),
@@ -541,17 +582,18 @@ def detect_telemetry_inconsistencies(
 
 
 def detect_risks(
-    records: list[NormalizedRecord], thresholds: RiskThresholds = THRESHOLDS
+    records: list[NormalizedRecord], thresholds: RiskThresholds = THRESHOLDS,
+    language: Language = Language.EN,
 ) -> list[Risk]:
     if not records:
         return []
     dataset_now = max(record.timestamp for record in records)
     risks = [
-        *detect_event_risks(records, dataset_now, thresholds),
-        *detect_worker_equipment_conflicts(records, dataset_now, thresholds),
-        *detect_environment_risks(records, dataset_now, thresholds),
-        *detect_status_risks(records, dataset_now, thresholds),
-        *detect_telemetry_inconsistencies(records, dataset_now, thresholds),
+        *detect_event_risks(records, dataset_now, thresholds, language),
+        *detect_worker_equipment_conflicts(records, dataset_now, thresholds, language),
+        *detect_environment_risks(records, dataset_now, thresholds, language),
+        *detect_status_risks(records, dataset_now, thresholds, language),
+        *detect_telemetry_inconsistencies(records, dataset_now, thresholds, language),
     ]
     unique = {risk.risk_id: risk for risk in risks}
     return sorted(

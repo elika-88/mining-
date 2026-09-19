@@ -8,7 +8,8 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict
 
 from app.models.normalized import NormalizedRecord
-from app.models.responses import GroundedFact, QuestionAnswer, Risk
+from app.models.responses import GroundedFact, Language, QuestionAnswer, Risk
+from app.services.localization import qtr, tr
 from app.store.memory import StoredAnalysis
 
 
@@ -34,7 +35,7 @@ class QuestionRoute(BaseModel):
 
 def display_timestamp(timestamp: datetime) -> str:
     if timestamp.year == 2000 and timestamp.month == 1 and timestamp.day == 1:
-        return f"{timestamp.strftime('%H:%M:%S')} (source date unavailable)"
+        return timestamp.strftime("%H:%M:%S")
     return timestamp.isoformat()
 
 
@@ -60,7 +61,11 @@ def deterministic_route(question: str, analysis: StoredAnalysis) -> QuestionRout
     entity_id = extract_known_value(question, entities)
     risk_id = extract_known_value(question, risk_ids)
 
-    minutes_match = re.search(r"(?:last|past|最近)\s*(\d{1,3})\s*(?:minutes?|mins?|分钟)", lowered)
+    minutes_match = re.search(
+        r"(?:last|past|最近|последние|соңғы)\s*(\d{1,3})\s*"
+        r"(?:minutes?|mins?|分钟|минут(?:ы|у)?|минут)",
+        lowered,
+    )
     minutes = min(240, max(1, int(minutes_match.group(1)))) if minutes_match else 30
     unknown_zone_requested = bool(re.search(r"\bzone\s+[a-z0-9_-]+", lowered)) and zone_id is None
     requested_entity = re.search(
@@ -71,15 +76,15 @@ def deterministic_route(question: str, analysis: StoredAnalysis) -> QuestionRout
 
     if unknown_zone_requested or unknown_entity_requested:
         intent = QuestionIntent.INSUFFICIENT
-    elif any(term in lowered for term in ("changed", "change", "last ", "past ", "变化", "最近")):
+    elif any(term in lowered for term in ("changed", "change", "last ", "past ", "变化", "最近", "измен", "последн", "өзгер", "соңғы")):
         intent = QuestionIntent.RECENT_CHANGES
-    elif any(term in lowered for term in ("evidence", "support", "alert", "证据", "依据")):
+    elif any(term in lowered for term in ("evidence", "support", "alert", "证据", "依据", "доказат", "подтверж", "дәлел", "раста")):
         intent = QuestionIntent.RISK_EVIDENCE
-    elif any(term in lowered for term in ("affected", "which workers", "which vehicles", "哪些人员", "哪些设备", "影响")):
+    elif any(term in lowered for term in ("affected", "which workers", "which vehicles", "哪些人员", "哪些设备", "影响", "затронут", "какие работник", "әсер ет", "қандай жұмысшы")):
         intent = QuestionIntent.AFFECTED_ENTITIES
-    elif zone_id and any(term in lowered for term in ("why", "danger", "risk", "危险", "风险")):
+    elif zone_id and any(term in lowered for term in ("why", "danger", "risk", "危险", "风险", "почему", "опас", "риск", "неге", "қауіп")):
         intent = QuestionIntent.ZONE_RISK
-    elif any(term in lowered for term in ("immediate", "first", "highest", "top", "priority", "最紧急", "优先")):
+    elif any(term in lowered for term in ("immediate", "first", "highest", "top", "priority", "最紧急", "优先", "立即", "немедлен", "перв", "приорит", "дереу", "бірінші", "басым")):
         intent = QuestionIntent.TOP_RISK
     elif any(term in lowered for term in ("overview", "situation", "summary", "概况", "情况")):
         intent = QuestionIntent.GENERAL_OVERVIEW
@@ -180,18 +185,25 @@ def matching_risks(route: QuestionRoute, risks: list[Risk]) -> list[Risk]:
     return selected
 
 
-def evidence_statement(record: NormalizedRecord) -> str:
+def evidence_statement(record: NormalizedRecord, language: Language) -> str:
     details = []
     for key, value in record.values.items():
         if value is not None and key not in {"worker_id", "equipment_id", "event_id", "zone_id"}:
             details.append(f"{key}={value}")
     subject = record.entity_id or record.record_type.rstrip("s")
-    zone = f" in {record.zone_id}" if record.zone_id else ""
-    suffix = f"; {', '.join(details)}" if details else ""
-    return f"{subject} was recorded at {display_timestamp(record.timestamp)}{zone}{suffix}."
+    zone = qtr(language, "zone_suffix", zone=record.zone_id) if record.zone_id else ""
+    return qtr(
+        language,
+        "record",
+        timestamp=display_timestamp(record.timestamp),
+        zone=zone,
+        details=f"{subject}; {', '.join(details)}" if details else subject,
+    )
 
 
-def facts_from_risks(risks: list[Risk], limit: int = 12) -> list[GroundedFact]:
+def facts_from_risks(
+    risks: list[Risk], language: Language, limit: int = 12
+) -> list[GroundedFact]:
     facts: list[GroundedFact] = []
     seen: set[str] = set()
     for risk in risks:
@@ -204,13 +216,15 @@ def facts_from_risks(risks: list[Risk], limit: int = 12) -> list[GroundedFact]:
                 for key, value in evidence.facts.items()
                 if value is not None and key != "zone_id"
             ]
-            zone = f" in {evidence.zone_id}" if evidence.zone_id else ""
-            suffix = f"; {', '.join(details)}" if details else ""
+            zone = qtr(language, "zone_suffix", zone=evidence.zone_id) if evidence.zone_id else ""
             facts.append(
                 GroundedFact(
-                    statement=(
-                        f"Record at {display_timestamp(evidence.timestamp) if evidence.timestamp else 'unknown time'}"
-                        f"{zone}{suffix}."
+                    statement=qtr(
+                        language,
+                        "record",
+                        timestamp=display_timestamp(evidence.timestamp) if evidence.timestamp else "—",
+                        zone=zone,
+                        details=", ".join(details) if details else "—",
                     ),
                     evidence_ids=[evidence.evidence_id],
                 )
@@ -220,9 +234,12 @@ def facts_from_risks(risks: list[Risk], limit: int = 12) -> list[GroundedFact]:
     return facts
 
 
-def insufficient_answer(question: str, message: str, limitation: str) -> QuestionAnswer:
+def insufficient_answer(
+    question: str, message: str, limitation: str, language: Language
+) -> QuestionAnswer:
     return QuestionAnswer(
         question=question,
+        language=language,
         answer=message,
         answer_mode="deterministic_fallback",
         fallback_reason="insufficient_grounded_data",
@@ -233,63 +250,85 @@ def insufficient_answer(question: str, message: str, limitation: str) -> Questio
     )
 
 
-def answer_top_risk(question: str, risks: list[Risk], mode: str) -> QuestionAnswer:
+def answer_top_risk(
+    question: str, risks: list[Risk], mode: str, language: Language
+) -> QuestionAnswer:
     if not risks:
         return insufficient_answer(
             question,
-            "No risks were detected in the valid uploaded records.",
-            "No detected risks does not prove that the shift is safe; unavailable or rejected data may limit coverage.",
+            qtr(language, "no_risks"),
+            qtr(language, "no_risks_limit"),
+            language,
         )
     risk = risks[0]
     return QuestionAnswer(
         question=question,
-        answer=(
-            f"Investigate {risk.title} in {risk.zone_id or 'an unspecified zone'} first. "
-            f"It is {risk.priority.value} priority with score {risk.score}. {risk.interpretation}"
+        language=language,
+        answer=qtr(
+            language,
+            "top",
+            title=risk.title,
+            zone=risk.zone_id or qtr(language, "unspecified_zone"),
+            priority=risk.priority.value,
+            score=risk.score,
+            interpretation=risk.interpretation,
         ),
         answer_mode=mode,
-        observed_facts=facts_from_risks([risk]),
+        observed_facts=facts_from_risks([risk], language),
         interpretation=risk.interpretation,
         recommended_action=risk.recommended_action,
         limitations=risk.limitations,
     )
 
 
-def answer_zone(question: str, route: QuestionRoute, risks: list[Risk], mode: str) -> QuestionAnswer:
+def answer_zone(
+    question: str, route: QuestionRoute, risks: list[Risk], mode: str, language: Language
+) -> QuestionAnswer:
     if route.zone_id is None:
         return insufficient_answer(
             question,
-            "I could not identify a zone from the question.",
-            "Ask using a zone identifier present in the uploaded records.",
+            qtr(language, "zone_missing"),
+            qtr(language, "zone_missing_limit"),
+            language,
         )
     if not risks:
         return insufficient_answer(
             question,
-            f"No detected risk is associated with {route.zone_id} in the available records.",
-            "This does not prove the zone is safe; data may be missing or outside the analysis window.",
+            qtr(language, "zone_none", zone=route.zone_id),
+            qtr(language, "zone_none_limit"),
+            language,
         )
     top = risks[0]
     titles = ", ".join(f"{risk.title} ({risk.priority.value})" for risk in risks[:4])
     return QuestionAnswer(
         question=question,
-        answer=(
-            f"{route.zone_id} has {len(risks)} detected risk(s): {titles}. "
-            f"The highest is {top.title} with score {top.score}."
+        language=language,
+        answer=qtr(
+            language,
+            "zone_answer",
+            zone=route.zone_id,
+            count=len(risks),
+            titles=titles,
+            top=top.title,
+            score=top.score,
         ),
         answer_mode=mode,
-        observed_facts=facts_from_risks(risks),
+        observed_facts=facts_from_risks(risks, language),
         interpretation=top.interpretation,
         recommended_action=top.recommended_action,
         limitations=list(dict.fromkeys(item for risk in risks for item in risk.limitations)),
     )
 
 
-def answer_affected(question: str, risks: list[Risk], mode: str) -> QuestionAnswer:
+def answer_affected(
+    question: str, risks: list[Risk], mode: str, language: Language
+) -> QuestionAnswer:
     if not risks:
         return insufficient_answer(
             question,
-            "No affected workers or equipment can be identified from the selected scope.",
-            "The available records do not support an affected-entity conclusion.",
+            qtr(language, "affected_none"),
+            qtr(language, "affected_none_limit"),
+            language,
         )
     entities = sorted(
         {(entity.type.value, entity.id) for risk in risks for entity in risk.affected_entities}
@@ -297,35 +336,42 @@ def answer_affected(question: str, risks: list[Risk], mode: str) -> QuestionAnsw
     if not entities:
         return insufficient_answer(
             question,
-            "The selected risks do not identify affected workers or equipment.",
-            "An event or environmental risk may have no entity record within the context window.",
+            qtr(language, "affected_empty"),
+            qtr(language, "affected_empty_limit"),
+            language,
         )
-    entity_text = ", ".join(f"{entity_type} {entity_id}" for entity_type, entity_id in entities)
+    entity_text = ", ".join(
+        f"{tr(language, f'entity.{entity_type}')} {entity_id}"
+        for entity_type, entity_id in entities
+    )
     return QuestionAnswer(
         question=question,
-        answer=f"The selected risk context identifies: {entity_text}.",
+        language=language,
+        answer=qtr(language, "affected_answer", entities=entity_text),
         answer_mode=mode,
-        observed_facts=facts_from_risks(risks),
-        interpretation="Entities are listed only when they occur in the selected risk evidence context.",
+        observed_facts=facts_from_risks(risks, language),
+        interpretation=qtr(language, "affected_interpretation"),
         recommended_action=risks[0].recommended_action,
-        limitations=[
-            "Zone-level co-presence does not establish precise distance or direct involvement."
-        ],
+        limitations=[qtr(language, "affected_limit")],
     )
 
 
-def answer_evidence(question: str, risks: list[Risk], mode: str) -> QuestionAnswer:
+def answer_evidence(
+    question: str, risks: list[Risk], mode: str, language: Language
+) -> QuestionAnswer:
     if not risks:
         return insufficient_answer(
             question,
-            "No matching alert was found, so supporting evidence cannot be shown.",
-            "Specify a valid risk ID, zone, or affected entity from this analysis.",
+            qtr(language, "evidence_none"),
+            qtr(language, "evidence_none_limit"),
+            language,
         )
     risk = risks[0]
-    facts = facts_from_risks([risk])
+    facts = facts_from_risks([risk], language)
     return QuestionAnswer(
         question=question,
-        answer=f"{len(facts)} source record(s) support {risk.title}. Each fact includes its evidence ID.",
+        language=language,
+        answer=qtr(language, "evidence_answer", count=len(facts), title=risk.title),
         answer_mode=mode,
         observed_facts=facts,
         interpretation=risk.interpretation,
@@ -335,7 +381,10 @@ def answer_evidence(question: str, risks: list[Risk], mode: str) -> QuestionAnsw
 
 
 def change_facts(
-    records: tuple[NormalizedRecord, ...], minutes: int, zone_id: str | None = None
+    records: tuple[NormalizedRecord, ...],
+    minutes: int,
+    language: Language,
+    zone_id: str | None = None,
 ) -> list[GroundedFact]:
     if not records:
         return []
@@ -353,7 +402,12 @@ def change_facts(
         ),
         key=lambda item: item.timestamp,
     ):
-        facts.append(GroundedFact(statement=evidence_statement(event), evidence_ids=[event.evidence_id]))
+        facts.append(
+            GroundedFact(
+                statement=evidence_statement(event, language),
+                evidence_ids=[event.evidence_id],
+            )
+        )
 
     grouped_entities: dict[tuple[str, str], list[NormalizedRecord]] = defaultdict(list)
     for record in records:
@@ -369,21 +423,43 @@ def change_facts(
                 continue
             changes = []
             if previous.zone_id != current.zone_id:
-                changes.append(f"zone {previous.zone_id} -> {current.zone_id}")
+                changes.append(
+                    qtr(
+                        language,
+                        "change_zone",
+                        first=previous.zone_id,
+                        last=current.zone_id,
+                    )
+                )
             previous_status = previous.values.get("status")
             current_status = current.values.get("status")
             if previous_status != current_status:
-                changes.append(f"status {previous_status} -> {current_status}")
+                changes.append(
+                    qtr(
+                        language,
+                        "change_status",
+                        first=previous_status,
+                        last=current_status,
+                    )
+                )
             if current.record_type == "equipment" and previous.values.get("speed") != current.values.get("speed"):
                 changes.append(
-                    f"speed {previous.values.get('speed')} -> {current.values.get('speed')}"
+                    qtr(
+                        language,
+                        "change_speed",
+                        first=previous.values.get("speed"),
+                        last=current.values.get("speed"),
+                    )
                 )
             if changes:
                 facts.append(
                     GroundedFact(
-                        statement=(
-                            f"{entity_id} changed at {display_timestamp(current.timestamp)}: "
-                            f"{'; '.join(changes)}."
+                        statement=qtr(
+                            language,
+                            "change_entity",
+                            entity_id=entity_id,
+                            timestamp=display_timestamp(current.timestamp),
+                            changes="; ".join(changes),
                         ),
                         evidence_ids=[previous.evidence_id, current.evidence_id],
                     )
@@ -406,14 +482,20 @@ def change_facts(
         changes = []
         for field in ("gas_level", "temperature", "visibility"):
             if first.values.get(field) != last.values.get(field):
-                changes.append(f"{field} {first.values.get(field)} -> {last.values.get(field)}")
+                changes.append(
+                    f"{tr(language, f'field.{field}')} "
+                    f"{first.values.get(field)} -> {last.values.get(field)}"
+                )
         if changes:
             facts.append(
                 GroundedFact(
-                    statement=(
-                        f"{zone_id} environmental readings changed between "
-                        f"{display_timestamp(first.timestamp)} and {display_timestamp(last.timestamp)}: "
-                        f"{'; '.join(changes)}."
+                    statement=qtr(
+                        language,
+                        "change_environment",
+                        zone=zone_id,
+                        first=display_timestamp(first.timestamp),
+                        last=display_timestamp(last.timestamp),
+                        changes="; ".join(changes),
                     ),
                     evidence_ids=[first.evidence_id, last.evidence_id],
                 )
@@ -422,48 +504,64 @@ def change_facts(
 
 
 def answer_changes(
-    question: str, analysis: StoredAnalysis, route: QuestionRoute, mode: str
+    question: str,
+    analysis: StoredAnalysis,
+    route: QuestionRoute,
+    mode: str,
+    language: Language,
 ) -> QuestionAnswer:
-    facts = change_facts(analysis.records, route.minutes, route.zone_id)
+    facts = change_facts(analysis.records, route.minutes, language, route.zone_id)
     if not facts:
         return insufficient_answer(
             question,
-            f"No supported changes were found during the last {route.minutes} minutes of dataset time.",
-            "A change requires comparable records; a single observation cannot establish a trend.",
+            qtr(language, "changes_none", minutes=route.minutes),
+            qtr(language, "changes_none_limit"),
+            language,
         )
     return QuestionAnswer(
         question=question,
-        answer=(
-            f"{len(facts)} supported change(s) were found"
-            f"{f' in {route.zone_id}' if route.zone_id else ''} during the last "
-            f"{route.minutes} minutes of dataset time."
+        language=language,
+        answer=qtr(
+            language,
+            "changes_answer",
+            count=len(facts),
+            zone_suffix=qtr(language, "zone_suffix", zone=route.zone_id)
+            if route.zone_id
+            else "",
+            minutes=route.minutes,
         ),
         answer_mode=mode,
         observed_facts=facts,
-        interpretation="Changes are comparisons of timestamped uploaded records, not inferred causes.",
-        recommended_action="Review the cited changes alongside the prioritized risk list.",
-        limitations=[
-            "Only recorded observations are compared; unrecorded intermediate changes are unknown."
-        ],
+        interpretation=qtr(language, "changes_interpretation"),
+        recommended_action=qtr(language, "changes_action"),
+        limitations=[qtr(language, "changes_limit")],
     )
 
 
-def answer_overview(question: str, analysis: StoredAnalysis, mode: str) -> QuestionAnswer:
+def answer_overview(
+    question: str, analysis: StoredAnalysis, mode: str, language: Language
+) -> QuestionAnswer:
     risks = analysis.response.risks
     overview = analysis.response.overview
     if not risks:
-        return answer_top_risk(question, risks, mode)
+        return answer_top_risk(question, risks, mode, language)
     top = risks[0]
     return QuestionAnswer(
         question=question,
-        answer=(
-            f"The shift has {overview.active_workers} active worker(s), "
-            f"{overview.active_equipment} active equipment item(s), {overview.shift_events} "
-            f"event(s), and {len(risks)} detected risk(s). The first priority is {top.title} "
-            f"in {top.zone_id or 'an unspecified zone'} with score {top.score}."
+        language=language,
+        answer=qtr(
+            language,
+            "overview",
+            workers=overview.active_workers,
+            equipment=overview.active_equipment,
+            events=overview.shift_events,
+            risks=len(risks),
+            title=top.title,
+            zone=top.zone_id or qtr(language, "unspecified_zone"),
+            score=top.score,
         ),
         answer_mode=mode,
-        observed_facts=facts_from_risks([top]),
+        observed_facts=facts_from_risks([top], language),
         interpretation=top.interpretation,
         recommended_action=top.recommended_action,
         limitations=top.limitations,
@@ -477,6 +575,7 @@ def answer_question(
     risk_id: str | None = None,
     zone_id: str | None = None,
     entity_id: str | None = None,
+    language: Language = Language.EN,
 ) -> QuestionAnswer:
     ai_route = route_with_openai(question, analysis)
     route = ai_route or deterministic_route(question, analysis)
@@ -493,58 +592,64 @@ def answer_question(
     if risk_id is not None and risk_id not in valid_risk_ids:
         return insufficient_answer(
             question,
-            "The requested risk was not found in this analysis.",
-            "The system does not use risk identifiers from another analysis.",
+            qtr(language, "unknown_risk"),
+            qtr(language, "unknown_risk_limit"),
+            language,
         )
     if zone_id is not None and zone_id not in available_zones(analysis):
         return insufficient_answer(
             question,
-            "The requested zone was not found in the uploaded data.",
-            "The system does not infer zone identifiers that are absent from the dataset.",
+            qtr(language, "unknown_zone"),
+            qtr(language, "unknown_zone_limit"),
+            language,
         )
     if entity_id is not None and entity_id not in available_entities(analysis):
         return insufficient_answer(
             question,
-            "The requested entity was not found in the uploaded data.",
-            "The system does not infer entity identifiers that are absent from the dataset.",
+            qtr(language, "unknown_entity"),
+            qtr(language, "unknown_entity_limit"),
+            language,
         )
     route.risk_id = risk_id or route.risk_id
     route.zone_id = zone_id or route.zone_id
     route.entity_id = entity_id or route.entity_id
     lowered_question = question.casefold()
     if risk_id and any(
-        term in lowered_question for term in ("evidence", "support", "alert", "证据", "依据")
+        term in lowered_question
+        for term in ("evidence", "support", "alert", "证据", "依据", "доказат", "подтверж", "дәлел")
     ):
         route.intent = QuestionIntent.RISK_EVIDENCE
     elif zone_id and any(
-        term in lowered_question for term in ("why", "danger", "risk", "危险", "风险")
+        term in lowered_question
+        for term in ("why", "danger", "risk", "危险", "风险", "почему", "опас", "неге", "қауіп")
     ):
         route.intent = QuestionIntent.ZONE_RISK
     elif entity_id and any(
         term in lowered_question
-        for term in ("affected", "worker", "vehicle", "equipment", "人员", "车辆", "设备")
+        for term in ("affected", "worker", "vehicle", "equipment", "人员", "车辆", "设备", "затронут", "работник", "әсер", "жұмысшы")
     ):
         route.intent = QuestionIntent.AFFECTED_ENTITIES
     risks = matching_risks(route, analysis.response.risks)
 
     if route.intent == QuestionIntent.TOP_RISK:
-        answer = answer_top_risk(question, risks, mode)
+        answer = answer_top_risk(question, risks, mode, language)
     elif route.intent == QuestionIntent.ZONE_RISK:
-        answer = answer_zone(question, route, risks, mode)
+        answer = answer_zone(question, route, risks, mode, language)
     elif route.intent == QuestionIntent.AFFECTED_ENTITIES:
-        answer = answer_affected(question, risks, mode)
+        answer = answer_affected(question, risks, mode, language)
     elif route.intent == QuestionIntent.RISK_EVIDENCE:
-        answer = answer_evidence(question, risks, mode)
+        answer = answer_evidence(question, risks, mode, language)
     elif route.intent == QuestionIntent.RECENT_CHANGES:
-        answer = answer_changes(question, analysis, route, mode)
+        answer = answer_changes(question, analysis, route, mode, language)
     elif route.intent == QuestionIntent.INSUFFICIENT:
         answer = insufficient_answer(
             question,
-            "The requested zone, entity, or risk was not found in the uploaded data.",
-            "The system does not infer identifiers that are absent from the dataset.",
+            qtr(language, "unknown_scope"),
+            qtr(language, "unknown_scope_limit"),
+            language,
         )
     else:
-        answer = answer_overview(question, analysis, mode)
+        answer = answer_overview(question, analysis, mode, language)
     answer.model_used = model_used
     if answer.answer_mode == "deterministic_fallback" and answer.fallback_reason is None:
         answer.fallback_reason = fallback_reason

@@ -8,6 +8,7 @@ from app.models.normalized import NormalizedRecord
 from app.models.responses import (
     AnalysisMetadata,
     AnalysisResponse,
+    Language,
     Overview,
     Priority,
     ProcessingSummary,
@@ -47,8 +48,12 @@ def is_active(record: NormalizedRecord, inactive_statuses: set[str]) -> bool:
     return str(status).strip().lower() not in inactive_statuses
 
 
-def build_analysis(ingestion: IngestionResult) -> tuple[AnalysisResponse, list[NormalizedRecord]]:
-    analysis_id = f"analysis-{uuid4().hex[:12]}"
+def build_analysis(
+    ingestion: IngestionResult,
+    language: Language = Language.EN,
+    analysis_id: str | None = None,
+) -> tuple[AnalysisResponse, list[NormalizedRecord]]:
+    analysis_id = analysis_id or f"analysis-{uuid4().hex[:12]}"
     timestamps = [record.timestamp for record in ingestion.records]
     latest_workers = latest_entity_records(ingestion.records, "workers")
     latest_equipment = latest_entity_records(ingestion.records, "equipment")
@@ -67,7 +72,7 @@ def build_analysis(ingestion: IngestionResult) -> tuple[AnalysisResponse, list[N
         for record in latest_equipment.values()
     )
     event_count = sum(record.record_type == "events" for record in ingestion.records)
-    risks = detect_risks(ingestion.records)
+    risks = detect_risks(ingestion.records, language=language)
     summary = ProcessingSummary(
         received_records=ingestion.received_records,
         valid_records=len(ingestion.records),
@@ -99,6 +104,7 @@ def build_analysis(ingestion: IngestionResult) -> tuple[AnalysisResponse, list[N
     return (
         AnalysisResponse(
             analysis_id=analysis_id,
+            language=language,
             overview=overview,
             risks=risks,
             metadata=metadata,

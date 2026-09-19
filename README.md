@@ -135,12 +135,29 @@ The bundled data is explicitly synthetic and is not organizer-provided mine data
 | `GET` | `/api/health` | Service health |
 | `GET` | `/api/config/risk-thresholds` | Active prototype thresholds |
 | `GET` | `/api/config/ai` | Safe AI-routing status |
-| `POST` | `/api/analyses` | Upload CSVs and run analysis |
+| `POST` | `/api/analyses` | Upload CSVs and run analysis; optional multipart `language` (`en`, `ru`, `kk`, `zh`) |
+| `POST` | `/api/analyses/{analysis_id}/localize` | Rebuild the same analysis in another supported language without re-uploading CSVs |
 | `GET` | `/api/analyses/{analysis_id}/overview` | Shift overview and processing quality |
 | `GET` | `/api/analyses/{analysis_id}/risks` | Prioritized/filterable risks |
 | `GET` | `/api/analyses/{analysis_id}/risks/{risk_id}` | Complete risk explanation |
 | `GET` | `/api/analyses/{analysis_id}/evidence/{evidence_id}` | Source evidence detail |
-| `POST` | `/api/analyses/{analysis_id}/questions` | Grounded natural-language answer |
+| `POST` | `/api/analyses/{analysis_id}/questions` | Grounded natural-language answer; optional JSON `language` override |
+
+Language changes preserve the analysis ID, risk IDs, source evidence, and data fingerprint. Only system-generated risk titles, interpretations, recommendations, limitations, and answer explanations are localized; uploaded IDs, zones, timestamps, statuses, descriptions, and sensor values remain unchanged as source-of-truth evidence.
+
+Frontend integration:
+
+```javascript
+formData.append("language", currentLanguage);
+
+const localized = await fetch(`/api/analyses/${currentAnalysis.analysis_id}/localize`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ language: currentLanguage })
+}).then((response) => response.json());
+
+const questionPayload = { question, language: currentLanguage };
+```
 
 ## Grounding and reliability
 
@@ -158,7 +175,7 @@ cd backend
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-The test suite covers contracts, malformed input, risk scoring, evidence resolution, question context, unsupported questions, AI structured routing, and deterministic fallback behavior.
+The test suite covers contracts, malformed input, risk scoring, evidence resolution, question context, unsupported questions, four-language output, AI structured routing, and deterministic fallback behavior.
 
 The committed `styles.css` is ready to run. Frontend contributors can regenerate it after changing utility classes with:
 
@@ -172,8 +189,8 @@ npx --yes tailwindcss@3.4.17 -c tailwind.config.cjs -i frontend.css -o styles.cs
 - Zone co-presence does not prove physical proximity because the supplied schema has no coordinates or distance.
 - Sensor and speed units must be confirmed with the actual site dataset.
 - Prototype thresholds must be aligned with the mine operator's approved standards.
-- The deterministic language router focuses on the challenge's English examples and common Chinese terms; the optional model improves intent routing for other phrasing.
-- The frontend displays the backend's English risk narratives; interface controls are translated into English, Chinese, Russian, and Kazakh.
+- The deterministic language router supports the challenge's common English, Chinese, Russian, and Kazakh question patterns; the optional model improves intent routing for other phrasing.
+- Uploaded source values are intentionally not machine-translated because the provided CSV files remain the source of truth.
 - The prototype does not include authentication, durable audit storage, or production deployment hardening.
 
 ## Data contract
