@@ -1,8 +1,9 @@
 import csv
 import hashlib
 import math
+import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import PurePath
 
 from fastapi import UploadFile
@@ -11,6 +12,7 @@ from app.models.normalized import NormalizedRecord, ScalarValue
 from app.models.responses import FileProcessingSummary
 
 MAX_FILE_BYTES = 10 * 1024 * 1024
+TIME_ONLY_PATTERN = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$")
 
 SCHEMAS: dict[str, dict[str, set[str]]] = {
     "workers": {
@@ -74,14 +76,30 @@ def parse_timestamp(value: str | None) -> datetime | None:
     if cleaned is None:
         return None
     candidate = cleaned[:-1] + "+00:00" if cleaned.endswith(("Z", "z")) else cleaned
+    if candidate.upper().endswith(" UTC"):
+        candidate = candidate[:-4] + "+00:00"
     try:
         parsed = datetime.fromisoformat(candidate)
     except ValueError:
         for timestamp_format in (
             "%Y-%m-%d %H:%M:%S",
             "%Y-%m-%d %H:%M",
+            "%Y/%m/%d %H:%M:%S",
+            "%Y/%m/%d %H:%M",
+            "%Y.%m.%d %H:%M:%S",
+            "%Y.%m.%d %H:%M",
             "%d/%m/%Y %H:%M:%S",
             "%d/%m/%Y %H:%M",
+            "%d-%m-%Y %H:%M:%S",
+            "%d-%m-%Y %H:%M",
+            "%d.%m.%Y %H:%M:%S",
+            "%d.%m.%Y %H:%M",
+            "%m/%d/%Y %I:%M:%S %p",
+            "%m/%d/%Y %I:%M %p",
+            "%Y年%m月%d日 %H:%M:%S",
+            "%Y年%m月%d日 %H:%M",
+            "%H:%M:%S",
+            "%H:%M",
         ):
             try:
                 parsed = datetime.strptime(cleaned, timestamp_format)
@@ -89,10 +107,35 @@ def parse_timestamp(value: str | None) -> datetime | None:
             except ValueError:
                 continue
         else:
-            return None
+            parsed = parse_numeric_timestamp(cleaned)
+            if parsed is None:
+                return None
     if parsed.tzinfo is not None:
         parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
+    if TIME_ONLY_PATTERN.fullmatch(cleaned):
+        parsed = parsed.replace(year=2000, month=1, day=1)
     return parsed
+
+
+def parse_numeric_timestamp(value: str) -> datetime | None:
+    try:
+        numeric_value = float(value)
+    except ValueError:
+        return None
+    if not math.isfinite(numeric_value):
+        return None
+    try:
+        if 20_000 <= numeric_value <= 100_000:
+            parsed = datetime(1899, 12, 30) + timedelta(days=numeric_value)
+        elif 946_684_800 <= numeric_value <= 4_102_444_800:
+            parsed = datetime.fromtimestamp(numeric_value, tz=timezone.utc).replace(tzinfo=None)
+        elif 946_684_800_000 <= numeric_value <= 4_102_444_800_000:
+            parsed = datetime.fromtimestamp(numeric_value / 1000, tz=timezone.utc).replace(tzinfo=None)
+        else:
+            return None
+    except (OverflowError, OSError, ValueError):
+        return None
+    return parsed if 1950 <= parsed.year <= 2100 else None
 
 
 def parse_number(value: str | None) -> int | float | None:
@@ -126,6 +169,7 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
     received_records = 0
     rejected_records = 0
     records: list[NormalizedRecord] = []
+    has_time_only_timestamps = False
 
     content = await upload.read(MAX_FILE_BYTES + 1)
     await upload.close()
@@ -197,14 +241,21 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
             seen_rows.add(row_key)
 
             missing_identity = sorted(field for field in schema["identity"] if not row.get(field))
-            timestamp = parse_timestamp(row.get("timestamp"))
+            raw_timestamp = row.get("timestamp")
+            timestamp_is_time_only = bool(raw_timestamp and TIME_ONLY_PATTERN.fullmatch(raw_timestamp))
+            has_time_only_timestamps = has_time_only_timestamps or timestamp_is_time_only
+            timestamp = parse_timestamp(raw_timestamp)
             if missing_identity or timestamp is None:
                 rejected_records += 1
                 reasons = []
                 if missing_identity:
                     reasons.append(f"missing {', '.join(missing_identity)}")
                 if row.get("timestamp") and timestamp is None:
-                    reasons.append("invalid timestamp")
+                    raw_timestamp = row["timestamp"]
+                    displayed_timestamp = (
+                        raw_timestamp if len(raw_timestamp) <= 80 else f"{raw_timestamp[:77]}..."
+                    )
+                    reasons.append(f"invalid timestamp {displayed_timestamp!r}")
                 warnings.append(f"Row {row_number}: {'; '.join(reasons)}; row was rejected.")
                 continue
 
@@ -220,6 +271,9 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
                     values[header] = numeric_value
                 else:
                     values[header] = row.get(header)
+            if timestamp_is_time_only:
+                values["source_timestamp"] = raw_timestamp
+                values["timestamp_date_available"] = False
 
             zone_id = row.get("zone_id")
             if zone_id is None:
@@ -250,6 +304,11 @@ async def ingest_upload(file_type: str, upload: UploadFile) -> tuple[list[Normal
 
     if received_records == 0 and not warnings:
         warnings.append("File contains a header but no data rows.")
+    if has_time_only_timestamps:
+        warnings.append(
+            "Timestamps contain time only; the source date is unavailable. "
+            "Records are compared within one shift and displayed without an inferred date."
+        )
     warnings.extend(
         f"Row {record.source_row}: {issue}" for record in records for issue in record.validation_issues
     )

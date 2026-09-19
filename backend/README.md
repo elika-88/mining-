@@ -52,8 +52,8 @@ The request accepts optional `risk_id`, `zone_id`, and `entity_id` context. Fron
 the selected risk ID for questions such as “What evidence supports this alert?” Context is
 validated against the current analysis and identifiers from another analysis are rejected.
 
-The optional OpenAI Responses API integration uses structured output only to classify the
-question and extract parameters from identifiers already present in the analysis. Final answers,
+The optional OpenAI-compatible Chat Completions integration returns a JSON route used only to
+classify the question and extract parameters from identifiers already present in the analysis. Final answers,
 facts, values, timestamps, recommendations, and limitations are generated deterministically by
 the backend. This prevents the model from adding unsupported mine data.
 
@@ -62,9 +62,12 @@ Configuration:
 ```env
 OPENAI_API_KEY=your-key
 AI_MODEL=your-available-model-id
+AI_BASE_URL=https://api.openai.com/v1
 ```
 
-`AI_API_KEY` is accepted as an alternative key name. If the key or model is absent, the API
+Run `./configure-ai.ps1` from the repository root to securely configure OpenAI or a third-party
+OpenAI-compatible relay, fetch its `/models` list, and select a model. The relay must support
+`/chat/completions`. `AI_API_KEY` is accepted as an alternative key name. If the key or model is absent, the API
 times out, the provider fails, or the structured route is invalid, the endpoint automatically
 uses `deterministic_fallback`. No API key is required for the fallback.
 
@@ -73,10 +76,8 @@ Values can be placed in `backend/.env`; the application loads this file at start
 `CORS_ALLOW_ORIGINS` can override the comma-separated frontend origins; both `localhost:5173`
 and `127.0.0.1:5173` are enabled by default for the included frontend.
 
-The Responses API structured-output implementation follows the official OpenAI documentation:
-
-- https://developers.openai.com/api/docs/guides/structured-outputs
-- https://developers.openai.com/api/docs/guides/text?api-mode=responses
+The model output is parsed into a strict Pydantic route and rejected if it references an identifier
+that is absent from the uploaded analysis.
 
 ## Frontend integration
 

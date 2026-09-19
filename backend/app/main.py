@@ -1,6 +1,7 @@
 import os
 from dataclasses import asdict
 from typing import Annotated
+from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +23,7 @@ from app.store.memory import StoredAnalysis, analysis_store
 
 app = FastAPI(
     title="Mine Safety Incident Prevention API",
-    version="0.4.0",
+    version="0.5.0",
     description=(
         "Mine-shift CSV ingestion and deterministic risk analysis API with row-level "
         "validation, evidence provenance, transparent scoring, and prioritized risks."
@@ -70,10 +71,16 @@ def risk_thresholds() -> dict[str, float]:
 @app.get("/api/config/ai", tags=["system"])
 def ai_configuration() -> dict[str, str | bool | None]:
     model = os.getenv("AI_MODEL")
+    base_url = os.getenv("AI_BASE_URL") or "https://api.openai.com/v1"
+    parsed_base_url = urlsplit(base_url)
+    public_base_url = urlunsplit(
+        (parsed_base_url.scheme, parsed_base_url.netloc, parsed_base_url.path, "", "")
+    )
     configured = bool((os.getenv("OPENAI_API_KEY") or os.getenv("AI_API_KEY")) and model)
     return {
         "configured": configured,
         "model": model,
+        "base_url": public_base_url,
         "fallback_available": True,
     }
 

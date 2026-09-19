@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -45,7 +46,7 @@ def create_valid_analysis() -> dict:
 def test_health() -> None:
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "version": "0.4.0"}
+    assert response.json() == {"status": "ok", "version": "0.5.0"}
 
 
 def test_requires_at_least_one_file() -> None:
@@ -108,6 +109,106 @@ def test_invalid_rows_are_isolated_without_crashing() -> None:
     assert summary["valid_records"] == 1
     assert summary["rejected_records"] == 2
     assert any("invalid timestamp" in warning for warning in summary["warnings"])
+
+
+@pytest.mark.parametrize(
+    "timestamp",
+    [
+        "2026/09/19 08:02:00",
+        "2026.09.19 08:02",
+        "19-09-2026 08:02:00",
+        "09/19/2026 08:02 AM",
+        "2026年09月19日 08:02",
+        "2026-09-19 08:02:00 UTC",
+        "08:02",
+        "08:02:30",
+        "46384.3347222222",
+        "1789804920",
+        "1789804920000",
+    ],
+)
+def test_common_ai_and_spreadsheet_timestamps_are_accepted(timestamp: str) -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "workers": csv_upload(
+                "workers.csv",
+                "worker_id,timestamp,zone_id,status\n"
+                f'W-2,"{timestamp}",Zone B,active\n',
+            )
+        },
+    )
+    assert response.status_code == 201
+    summary = response.json()["overview"]["processing_summary"]
+    assert summary["valid_records"] == 1
+    assert summary["rejected_records"] == 0
+
+
+def test_time_only_timestamp_is_disclosed_without_inventing_a_source_date() -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "workers": csv_upload(
+                "workers.csv",
+                "worker_id,timestamp,zone_id,status\n"
+                "W-2,08:02,Zone B,active\n",
+            )
+        },
+    )
+    payload = response.json()
+    summary = payload["overview"]["processing_summary"]
+    assert summary["valid_records"] == 1
+    assert any("source date is unavailable" in warning for warning in summary["warnings"])
+
+
+def test_time_only_shift_can_generate_and_sort_risks() -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "workers": csv_upload(
+                "workers.csv",
+                "worker_id,timestamp,zone_id,status\n"
+                "W-17,08:00,Zone B,active\n"
+                "W-17,15:21,Zone B,active\n",
+            ),
+            "equipment": csv_upload(
+                "equipment.csv",
+                "equipment_id,equipment_type,timestamp,zone_id,status\n"
+                "T-04,truck,15:23,Zone B,active\n",
+            ),
+            "environment": csv_upload(
+                "environment.csv",
+                "timestamp,zone_id,gas_level\n"
+                "08:00,Zone B,4\n"
+                "15:20,Zone B,22\n",
+            ),
+            "events": csv_upload(
+                "events.csv",
+                "event_id,timestamp,zone_id,event_type,severity,description\n"
+                "E-1,15:24,Zone B,restricted_area_entry,high,Vehicle in restricted area\n",
+            ),
+        },
+    )
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["overview"]["processing_summary"]["valid_records"] == 6
+    assert payload["overview"]["processing_summary"]["rejected_records"] == 0
+    assert payload["risks"]
+
+
+def test_invalid_timestamp_warning_includes_the_original_value() -> None:
+    response = client.post(
+        "/api/analyses",
+        files={
+            "workers": csv_upload(
+                "workers.csv",
+                "worker_id,timestamp,zone_id,status\n"
+                "W-2,September someday,Zone B,active\n",
+            )
+        },
+    )
+    warnings = response.json()["overview"]["processing_summary"]["warnings"]
+    assert any("invalid timestamp 'September someday'" in warning for warning in warnings)
 
 
 def test_invalid_numeric_is_null_but_record_remains_valid() -> None:

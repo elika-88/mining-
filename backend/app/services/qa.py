@@ -32,6 +32,12 @@ class QuestionRoute(BaseModel):
     minutes: int = 30
 
 
+def display_timestamp(timestamp: datetime) -> str:
+    if timestamp.year == 2000 and timestamp.month == 1 and timestamp.day == 1:
+        return f"{timestamp.strftime('%H:%M:%S')} (source date unavailable)"
+    return timestamp.isoformat()
+
+
 def available_zones(analysis: StoredAnalysis) -> list[str]:
     return sorted({record.zone_id for record in analysis.records if record.zone_id})
 
@@ -96,21 +102,31 @@ def deterministic_route(question: str, analysis: StoredAnalysis) -> QuestionRout
 def route_with_openai(question: str, analysis: StoredAnalysis) -> QuestionRoute | None:
     api_key = os.getenv("OPENAI_API_KEY") or os.getenv("AI_API_KEY")
     model = os.getenv("AI_MODEL")
+    base_url = os.getenv("AI_BASE_URL")
     if not api_key or not model:
         return None
     try:
         from openai import OpenAI
 
-        client = OpenAI(api_key=api_key, timeout=8.0, max_retries=0)
-        response = client.responses.parse(
+        client_options = {
+            "api_key": api_key,
+            "timeout": 8.0,
+            "max_retries": 0,
+        }
+        if base_url:
+            client_options["base_url"] = base_url.rstrip("/")
+        client = OpenAI(**client_options)
+        response = client.chat.completions.create(
             model=model,
-            input=[
+            messages=[
                 {
                     "role": "system",
                     "content": (
                         "Classify a mine-shift supervisor question. Select only from the provided "
                         "zones, entities, and risk IDs. Do not invent identifiers. Use 30 minutes "
-                        "when no time window is stated. Return only the structured route."
+                        "when no time window is stated. Return only one JSON object with keys "
+                        "intent, zone_id, entity_id, risk_id, and minutes. Valid intents are "
+                        f"{', '.join(intent.value for intent in QuestionIntent)}."
                     ),
                 },
                 {
@@ -127,11 +143,15 @@ def route_with_openai(question: str, analysis: StoredAnalysis) -> QuestionRoute 
                     ),
                 },
             ],
-            text_format=QuestionRoute,
         )
-        route = response.output_parsed
-        if route is None:
+        content = response.choices[0].message.content
+        if not content:
             return None
+        json_start = content.find("{")
+        json_end = content.rfind("}")
+        if json_start < 0 or json_end < json_start:
+            return None
+        route = QuestionRoute.model_validate_json(content[json_start : json_end + 1])
         if route.zone_id and route.zone_id not in available_zones(analysis):
             return None
         if route.entity_id and route.entity_id not in available_entities(analysis):
@@ -168,7 +188,7 @@ def evidence_statement(record: NormalizedRecord) -> str:
     subject = record.entity_id or record.record_type.rstrip("s")
     zone = f" in {record.zone_id}" if record.zone_id else ""
     suffix = f"; {', '.join(details)}" if details else ""
-    return f"{subject} was recorded at {record.timestamp.isoformat()}{zone}{suffix}."
+    return f"{subject} was recorded at {display_timestamp(record.timestamp)}{zone}{suffix}."
 
 
 def facts_from_risks(risks: list[Risk], limit: int = 12) -> list[GroundedFact]:
@@ -189,7 +209,7 @@ def facts_from_risks(risks: list[Risk], limit: int = 12) -> list[GroundedFact]:
             facts.append(
                 GroundedFact(
                     statement=(
-                        f"Record at {evidence.timestamp.isoformat() if evidence.timestamp else 'unknown time'}"
+                        f"Record at {display_timestamp(evidence.timestamp) if evidence.timestamp else 'unknown time'}"
                         f"{zone}{suffix}."
                     ),
                     evidence_ids=[evidence.evidence_id],
@@ -361,7 +381,7 @@ def change_facts(
                 facts.append(
                     GroundedFact(
                         statement=(
-                            f"{entity_id} changed at {current.timestamp.isoformat()}: "
+                            f"{entity_id} changed at {display_timestamp(current.timestamp)}: "
                             f"{'; '.join(changes)}."
                         ),
                         evidence_ids=[previous.evidence_id, current.evidence_id],
@@ -391,7 +411,7 @@ def change_facts(
                 GroundedFact(
                     statement=(
                         f"{zone_id} environmental readings changed between "
-                        f"{first.timestamp.isoformat()} and {last.timestamp.isoformat()}: "
+                        f"{display_timestamp(first.timestamp)} and {display_timestamp(last.timestamp)}: "
                         f"{'; '.join(changes)}."
                     ),
                     evidence_ids=[first.evidence_id, last.evidence_id],

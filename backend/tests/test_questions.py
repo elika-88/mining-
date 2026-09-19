@@ -183,23 +183,29 @@ def test_ai_api_failure_falls_back_to_deterministic_grounded_answer(monkeypatch)
 def test_openai_structured_route_is_used_without_generating_facts(monkeypatch) -> None:
     analysis = create_analysis()
 
-    class FakeResponses:
-        def parse(self, **kwargs):
-            assert kwargs["text_format"] is qa.QuestionRoute
+    class FakeCompletions:
+        def create(self, **kwargs):
+            assert kwargs["model"] == "test-model"
+            assert kwargs["messages"][0]["role"] == "system"
             return SimpleNamespace(
-                output_parsed=qa.QuestionRoute(
-                    intent=qa.QuestionIntent.ZONE_RISK,
-                    zone_id="Zone B",
-                )
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(
+                            content='{"intent":"zone_risk","zone_id":"Zone B","entity_id":null,"risk_id":null,"minutes":30}'
+                        )
+                    )
+                ]
             )
 
     class FakeOpenAI:
         def __init__(self, **kwargs):
             assert kwargs["api_key"] == "test-key"
-            self.responses = FakeResponses()
+            assert kwargs["base_url"] == "https://relay.example/v1"
+            self.chat = SimpleNamespace(completions=FakeCompletions())
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("AI_MODEL", "test-model")
+    monkeypatch.setenv("AI_BASE_URL", "https://relay.example/v1/")
     monkeypatch.setattr("openai.OpenAI", FakeOpenAI)
     payload = ask(analysis["analysis_id"], "Tell me about Zone B")
     assert payload["answer_mode"] == "llm_routed"
@@ -210,12 +216,15 @@ def test_openai_structured_route_is_used_without_generating_facts(monkeypatch) -
 def test_ai_configuration_never_exposes_key(monkeypatch) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "secret-value")
     monkeypatch.setenv("AI_MODEL", "test-model")
+    monkeypatch.setenv("AI_BASE_URL", "https://api.openai.com/v1?token=base-url-secret")
     response = client.get("/api/config/ai")
     assert response.status_code == 200
     payload = response.json()
     assert payload == {
         "configured": True,
         "model": "test-model",
+        "base_url": "https://api.openai.com/v1",
         "fallback_available": True,
     }
     assert "secret-value" not in response.text
+    assert "base-url-secret" not in response.text

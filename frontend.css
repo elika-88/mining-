@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .score-grid {
+    @apply grid grid-cols-2 gap-2 md:grid-cols-5;
+  }
+
+  .score-item {
+    @apply rounded-xl bg-subtle p-3 text-center;
+  }
+
+  .score-value {
+    @apply block font-mono font-semibold text-heavy;
+  }
+
+  .score-label {
+    @apply mt-1 block text-[11px] capitalize text-subtext;
+  }
+
+  .quality-warning {
+    @apply rounded-xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-900;
+  }
+}

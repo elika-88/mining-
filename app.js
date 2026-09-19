@@ -2,7 +2,7 @@ const translations = {
   en: {
     appTitle: "MineShift Safety Console", awaitingShift: "Awaiting shift data", filesReady: "{count} files ready",
     analyzing: "Analyzing shift...", shiftLoaded: "Analysis completed", shiftLoadedWarnings: "Analysis completed with warnings",
-    workersLabel: "Active workers", equipmentLabel: "Active equipment", eventsLabel: "Shift events",
+    workersLabel: "Active workers", equipmentLabel: "Active equipment", eventsLabel: "Shift events", highRisksLabel: "High-priority risks",
     importBtn: "Select CSV files", runBtn: "Run analysis", noDataTitle: "No shift data loaded",
     noDataDesc: "Select the shift CSV files, then run the analysis.", noRisksTitle: "No risks detected",
     noRisksDesc: "The backend returned no detected risks for this dataset.", recommendedProtocol: "Recommended action",
@@ -22,12 +22,13 @@ const translations = {
     qualitySummary: "{valid} valid of {received} received · {rejected} rejected", exportReport: "Export report",
     languageNotice: "Interface labels are translated. Backend risk and answer text is shown in the language returned by the API.",
     score: "Score", clearEntityFilter: "Clear entity filter", filteringEntity: "Related to {entity}", evidenceUnavailable: "Evidence details unavailable",
-    asking: "Asking...", selected: "Selected"
+    asking: "Asking...", selected: "Selected", scoreBreakdown: "Score breakdown",
+    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — or click to browse", dropActive: "Release to add CSV files"
   },
   kk: {
     appTitle: "MineShift қауіпсіздік басқару панелі", awaitingShift: "Ауысым деректері күтілуде", filesReady: "{count} файл дайын",
     analyzing: "Ауысым талдануда...", shiftLoaded: "Талдау аяқталды", shiftLoadedWarnings: "Талдау ескертулермен аяқталды",
-    workersLabel: "Белсенді жұмысшылар", equipmentLabel: "Белсенді техника", eventsLabel: "Ауысым оқиғалары",
+    workersLabel: "Белсенді жұмысшылар", equipmentLabel: "Белсенді техника", eventsLabel: "Ауысым оқиғалары", highRisksLabel: "Жоғары басымдықты қауіптер",
     importBtn: "CSV файлдарын таңдау", runBtn: "Талдауды бастау", noDataTitle: "Ауысым деректері жүктелмеген",
     noDataDesc: "Ауысым CSV файлдарын таңдап, талдауды бастаңыз.", noRisksTitle: "Қауіптер анықталмады",
     noRisksDesc: "Сервер бұл деректер жиынтығында қауіп таппады.", recommendedProtocol: "Ұсынылатын әрекет",
@@ -47,12 +48,13 @@ const translations = {
     qualitySummary: "Қабылданғаны {received}, жарамдысы {valid}, қабылданбағаны {rejected}", exportReport: "Есепті экспорттау",
     languageNotice: "Интерфейс аударылады. Қауіп пен жауап мәтіні API қайтарған тілде көрсетіледі.",
     score: "Ұпай", clearEntityFilter: "Нысан сүзгісін тазалау", filteringEntity: "{entity} бойынша", evidenceUnavailable: "Дәлел деректері қолжетімсіз",
-    asking: "Сұрау жіберілуде...", selected: "Таңдалды"
+    asking: "Сұрау жіберілуде...", selected: "Таңдалды", scoreBreakdown: "Балл құрамы",
+    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — немесе таңдау үшін басыңыз", dropActive: "CSV файлдарын қосу үшін жіберіңіз"
   },
   ru: {
     appTitle: "MineShift — консоль безопасности", awaitingShift: "Ожидание данных смены", filesReady: "Файлов готово: {count}",
     analyzing: "Анализ смены...", shiftLoaded: "Анализ завершён", shiftLoadedWarnings: "Анализ завершён с предупреждениями",
-    workersLabel: "Активные рабочие", equipmentLabel: "Активная техника", eventsLabel: "События смены",
+    workersLabel: "Активные рабочие", equipmentLabel: "Активная техника", eventsLabel: "События смены", highRisksLabel: "Риски высокого приоритета",
     importBtn: "Выбрать CSV", runBtn: "Запустить анализ", noDataTitle: "Данные смены не загружены",
     noDataDesc: "Выберите CSV-файлы смены и запустите анализ.", noRisksTitle: "Риски не обнаружены",
     noRisksDesc: "Сервер не обнаружил рисков в этом наборе данных.", recommendedProtocol: "Рекомендуемое действие",
@@ -72,12 +74,13 @@ const translations = {
     qualitySummary: "Получено {received}, корректно {valid}, отклонено {rejected}", exportReport: "Экспортировать отчёт",
     languageNotice: "Интерфейс переведён. Тексты рисков и ответов показываются на языке, возвращённом API.",
     score: "Оценка", clearEntityFilter: "Сбросить фильтр объекта", filteringEntity: "Связано с {entity}", evidenceUnavailable: "Детали доказательства недоступны",
-    asking: "Отправка вопроса...", selected: "Выбрано"
+    asking: "Отправка вопроса...", selected: "Выбрано", scoreBreakdown: "Состав оценки",
+    dropHint: "workers.csv, equipment.csv, environment.csv, events.csv — или нажмите для выбора", dropActive: "Отпустите, чтобы добавить CSV"
   },
   zh: {
     appTitle: "MineShift 矿山安全调度控制台", awaitingShift: "等待导入班次数据", filesReady: "已选择 {count} 个文件",
     analyzing: "正在分析班次数据...", shiftLoaded: "分析已完成", shiftLoadedWarnings: "分析已完成，存在数据警告",
-    workersLabel: "在岗人员", equipmentLabel: "运行设备", eventsLabel: "班次事件",
+    workersLabel: "在岗人员", equipmentLabel: "运行设备", eventsLabel: "班次事件", highRisksLabel: "高优先级风险",
     importBtn: "选择 CSV 文件", runBtn: "执行分析", noDataTitle: "尚未接入班次数据",
     noDataDesc: "请选择本班次 CSV 文件，然后执行分析。", noRisksTitle: "未检测到风险",
     noRisksDesc: "后端未在当前数据集中返回任何风险。", recommendedProtocol: "建议处置行动",
@@ -97,7 +100,8 @@ const translations = {
     qualitySummary: "接收 {received} 条，有效 {valid} 条，拒绝 {rejected} 条", exportReport: "导出风险报告",
     languageNotice: "界面标签支持翻译；风险标题、解释和建议保持后端 API 返回的语言。",
     score: "评分", clearEntityFilter: "清除实体筛选", filteringEntity: "仅显示与 {entity} 相关", evidenceUnavailable: "无法获取证据详情",
-    asking: "正在提问...", selected: "已选择"
+    asking: "正在提问...", selected: "已选择", scoreBreakdown: "风险评分构成",
+    dropHint: "workers.csv、equipment.csv、environment.csv、events.csv，也可以点击选择", dropActive: "松开即可添加 CSV 文件"
   }
 };
 
@@ -189,8 +193,13 @@ function showMessage(message, sources = "") {
 }
 
 function handleFilesUpload(event) {
-  const nextFiles = new Map();
-  for (const file of event.target.files) {
+  selectFiles(event.target.files, true);
+  event.target.value = "";
+}
+
+function selectFiles(files, replace = false) {
+  const nextFiles = replace ? new Map() : new Map(selectedFiles);
+  for (const file of files) {
     const normalizedName = file.name.toLowerCase();
     if (!supportedFiles.has(normalizedName)) {
       showMessage(text("unknownFileError", { name: file.name }));
@@ -276,6 +285,7 @@ function renderAnalysis() {
   document.getElementById("statWorkers").textContent = overview?.active_workers ?? "--";
   document.getElementById("statEquipment").textContent = overview?.active_equipment ?? "--";
   document.getElementById("statEvents").textContent = overview?.shift_events ?? "--";
+  document.getElementById("statHighRisks").textContent = overview?.high_priority_risks ?? "--";
   document.getElementById("shiftStartValue").textContent = formatDateTime(overview?.shift_started_at);
   document.getElementById("shiftEndValue").textContent = formatDateTime(overview?.shift_ended_at);
   renderPriorityCounts();
@@ -307,7 +317,7 @@ function renderDataQuality() {
     panel.open = false;
     return;
   }
-  const processing = overview.processing_summary;
+  const processing = overview?.processing_summary;
   summary.textContent = text("qualitySummary", {
     received: processing.received_records,
     valid: processing.valid_records,
@@ -439,7 +449,8 @@ function renderSelectedRisk() {
   badge.className = `${presentation.classes} border rounded-full px-3 py-1 text-xs font-semibold`;
   badge.textContent = presentation.label;
   document.getElementById("detailZone").textContent = risk.zone_id || "—";
-  document.getElementById("detailTime").textContent = `${formatDateTime(risk.detected_at)} · ${text("score")} ${risk.score}/100`;
+  document.getElementById("detailScore").textContent = `${risk.score}/100`;
+  document.getElementById("detailTime").textContent = formatDateTime(risk.detected_at);
   document.getElementById("detailTitle").textContent = risk.title;
   const entities = document.getElementById("detailEntities");
   entities.replaceChildren();
@@ -459,7 +470,19 @@ function renderSelectedRisk() {
   const exportButton = document.getElementById("exportButton");
   exportButton.classList.remove("hidden");
   exportButton.onclick = () => exportRiskReport(risk);
+  renderScoreBreakdown(risk.score_breakdown);
   renderEvidence(risk);
+}
+
+function renderScoreBreakdown(breakdown) {
+  const container = document.getElementById("scoreBreakdown");
+  container.replaceChildren();
+  Object.entries(breakdown || {}).forEach(([label, value]) => {
+    const item = document.createElement("div");
+    item.className = "score-item";
+    item.innerHTML = `<span class="score-value">${escapeHtml(value)}</span><span class="score-label">${escapeHtml(label.replaceAll("_", " "))}</span>`;
+    container.appendChild(item);
+  });
 }
 
 function renderEvidence(risk) {
@@ -666,6 +689,11 @@ function formatDateTime(value) {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
+  if (date.getFullYear() === 2000 && date.getMonth() === 0 && date.getDate() === 1) {
+    return new Intl.DateTimeFormat(currentLanguage === "kk" ? "kk-KZ" : currentLanguage, {
+      hour: "2-digit", minute: "2-digit"
+    }).format(date);
+  }
   return new Intl.DateTimeFormat(currentLanguage === "kk" ? "kk-KZ" : currentLanguage, {
     month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit"
   }).format(date);
@@ -686,3 +714,24 @@ function escapeHtml(value) {
 renderFileStatus();
 changeLanguage("en");
 checkApiStatus();
+
+const dropZone = document.getElementById("dropZone");
+dropZone.addEventListener("click", (event) => {
+  if (event.target.closest("button")) return;
+  document.getElementById("csvFileInput").click();
+});
+dropZone.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    document.getElementById("csvFileInput").click();
+  }
+});
+["dragenter", "dragover"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => {
+  event.preventDefault();
+  dropZone.classList.add("drop-active");
+}));
+["dragleave", "drop"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => {
+  event.preventDefault();
+  dropZone.classList.remove("drop-active");
+}));
+dropZone.addEventListener("drop", (event) => selectFiles(event.dataTransfer.files));
