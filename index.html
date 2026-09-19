@@ -12,6 +12,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .app-header { display: grid; grid-template-columns: minmax(260px, 1fr) auto; }
+    .app-title { white-space: nowrap; }
     .metric-grid { display: grid; grid-template-columns: repeat(4, 140px); }
     .metric-item { min-width: 0; }
     .metric-label { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -33,7 +34,7 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
     }
-    @media (max-width: 1400px) {
+    @media (max-width: 1650px) {
       .app-header { grid-template-columns: 1fr; }
       .header-actions { justify-content: space-between; }
     }

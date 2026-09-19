@@ -51,3 +51,20 @@ def test_frontend_exposes_ai_status_and_managed_uploads() -> None:
     assert "function beginReplaceFile" in javascript
     assert "maxFileBytes" in javascript
     assert "answerModePresentation" in javascript
+
+
+def test_frontend_sends_and_refreshes_analysis_language() -> None:
+    javascript = (PROJECT_ROOT / "app.js").read_text(encoding="utf-8")
+
+    assert 'formData.append("language", currentLanguage)' in javascript
+    assert "/localize`" in javascript
+    assert "JSON.stringify({ language })" in javascript
+    assert "const requestPayload = { question, language: currentLanguage }" in javascript
+    assert "currentAnalysis = payload" in javascript
+
+
+def test_header_uses_two_rows_before_desktop_controls_overlap() -> None:
+    html = (PROJECT_ROOT / "index.html").read_text(encoding="utf-8")
+
+    assert "@media (max-width: 1650px)" in html
+    assert ".app-title { white-space: nowrap; }" in html

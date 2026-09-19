@@ -63,6 +63,8 @@ def test_russian_question_returns_russian_grounded_answer() -> None:
     payload = response.json()
     assert payload["language"] == "ru"
     assert payload["answer"].startswith("Сначала проверьте")
+    assert "КРИТИЧЕСКИЙ" in payload["answer"]
+    assert "CRITICAL" not in payload["answer"]
     assert payload["observed_facts"]
     assert all("Record at" not in fact["statement"] for fact in payload["observed_facts"])
 

@@ -250,11 +250,41 @@ function updateAiStatus() {
       : "min-w-[148px] flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-800 border border-sky-100";
 }
 
-function changeLanguage(language) {
+async function changeLanguage(language) {
   const scrollPosition = window.scrollY;
+  if (!translations[language]) return;
+  const previousLanguage = currentLanguage;
+  const languageSelect = document.getElementById("languageSelect");
+  if (currentAnalysis && (currentAnalysis.language || "en") !== language) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    languageSelect.disabled = true;
+    try {
+      const response = await fetch(apiUrl(`/api/analyses/${encodeURIComponent(currentAnalysis.analysis_id)}/localize`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language }),
+        signal: controller.signal
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.detail || `${response.status} ${response.statusText}`);
+      currentAnalysis = payload;
+      if (!(payload.risks || []).some((risk) => risk.risk_id === selectedRiskId)) {
+        selectedRiskId = payload.risks?.[0]?.risk_id || null;
+      }
+      document.getElementById("answerBox").classList.add("hidden");
+      apiConnected = true;
+    } catch (error) {
+      languageSelect.value = previousLanguage;
+      showMessage(classifyRequestError(error));
+      return;
+    } finally {
+      clearTimeout(timeout);
+      languageSelect.disabled = false;
+    }
+  }
   currentLanguage = language;
   document.documentElement.lang = language;
-  const languageSelect = document.getElementById("languageSelect");
   if (languageSelect.value !== language) languageSelect.value = language;
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     element.textContent = text(element.dataset.i18n);
@@ -427,6 +457,7 @@ async function triggerAnalyze() {
   document.getElementById("workspace").setAttribute("aria-busy", "true");
   const formData = new FormData();
   selectedFiles.forEach((file, field) => formData.append(field, file, file.name));
+  formData.append("language", currentLanguage);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60000);
   try {
@@ -789,7 +820,7 @@ async function submitCustomQuery() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45000);
   try {
-    const requestPayload = { question };
+    const requestPayload = { question, language: currentLanguage };
     const selectedRiskReference = /this (?:alert|risk)|selected (?:alert|risk)|这个(?:告警|风险)|该(?:告警|风险)|этот риск|это предупреждение|осы қауіп/i;
     if (selectedRiskId && selectedRiskReference.test(question)) {
       requestPayload.risk_id = selectedRiskId;

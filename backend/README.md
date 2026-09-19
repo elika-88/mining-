@@ -24,6 +24,19 @@ curl.exe -X POST http://127.0.0.1:8000/api/analyses `
   -F "events=@tests/fixtures/events.csv"
 ```
 
+Add multipart field `language=en|ru|kk|zh` to select the analysis language. To change
+an existing analysis without uploading the files again, call:
+
+```http
+POST /api/analyses/{analysis_id}/localize
+Content-Type: application/json
+
+{"language":"ru"}
+```
+
+The analysis ID, risk IDs, evidence, and data fingerprint remain stable across language changes.
+Uploaded values remain untouched; only system-generated analysis and recommendation text is localized.
+
 ## Current phase
 
 `POST /api/analyses` performs real CSV ingestion, header normalization, type coercion,
@@ -48,7 +61,7 @@ limitations, affected entities, and a score breakdown.
 evidence, recent-change, and shift-overview questions. Every observed fact contains evidence IDs
 that resolve through the evidence endpoint.
 
-The request accepts optional `risk_id`, `zone_id`, and `entity_id` context. Frontends should send
+The request accepts optional `risk_id`, `zone_id`, `entity_id`, and `language` context. Frontends should send
 the selected risk ID for questions such as “What evidence supports this alert?” Context is
 validated against the current analysis and identifiers from another analysis are rejected.
 
@@ -121,7 +134,7 @@ documented prototype assumption.
 ## Known limitations
 
 - In-memory analyses are lost when the server restarts; the store retains only the latest 25 analyses.
-- The deterministic language router targets the documented English examples and common Chinese terms.
+- The deterministic language router targets common English, Chinese, Russian, and Kazakh question patterns.
 - The optional model improves intent routing only; it does not replace deterministic analysis.
 - Zone records do not provide exact worker-equipment distance.
 - Sensor and speed units are not defined by the challenge schema.

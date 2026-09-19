@@ -269,7 +269,7 @@ def answer_top_risk(
             "top",
             title=risk.title,
             zone=risk.zone_id or qtr(language, "unspecified_zone"),
-            priority=risk.priority.value,
+            priority=tr(language, f"priority.{risk.priority.value.lower()}"),
             score=risk.score,
             interpretation=risk.interpretation,
         ),
@@ -299,7 +299,10 @@ def answer_zone(
             language,
         )
     top = risks[0]
-    titles = ", ".join(f"{risk.title} ({risk.priority.value})" for risk in risks[:4])
+    titles = ", ".join(
+        f"{risk.title} ({tr(language, f'priority.{risk.priority.value.lower()}')})"
+        for risk in risks[:4]
+    )
     return QuestionAnswer(
         question=question,
         language=language,

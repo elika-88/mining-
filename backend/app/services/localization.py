@@ -39,6 +39,10 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.visibility": "visibility",
         "trend.increased": "{field} increased from {first} to {last}",
         "trend.decreased": "{field} decreased from {first} to {last}",
+        "priority.critical": "CRITICAL",
+        "priority.high": "HIGH",
+        "priority.medium": "MEDIUM",
+        "priority.low": "LOW",
     },
     Language.RU: {
         "risk.event.title": "Зарегистрировано событие высокой тяжести",
@@ -77,6 +81,10 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.visibility": "видимость",
         "trend.increased": "{field} увеличился с {first} до {last}",
         "trend.decreased": "{field} снизилась с {first} до {last}",
+        "priority.critical": "КРИТИЧЕСКИЙ",
+        "priority.high": "ВЫСОКИЙ",
+        "priority.medium": "СРЕДНИЙ",
+        "priority.low": "НИЗКИЙ",
     },
     Language.ZH: {
         "risk.event.title": "记录到高严重度事件",
@@ -115,6 +123,10 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.visibility": "能见度",
         "trend.increased": "{field}从 {first} 上升到 {last}",
         "trend.decreased": "{field}从 {first} 下降到 {last}",
+        "priority.critical": "紧急",
+        "priority.high": "高",
+        "priority.medium": "中",
+        "priority.low": "低",
     },
     Language.KK: {
         "risk.event.title": "Жоғары ауырлықтағы оқиға тіркелді",
@@ -153,6 +165,10 @@ TEXT: dict[Language, dict[str, str]] = {
         "field.visibility": "көріну",
         "trend.increased": "{field} {first} мәнінен {last} мәніне өсті",
         "trend.decreased": "{field} {first} мәнінен {last} мәніне төмендеді",
+        "priority.critical": "СЫНДАРЛЫ",
+        "priority.high": "ЖОҒАРЫ",
+        "priority.medium": "ОРТАША",
+        "priority.low": "ТӨМЕН",
     },
 }
 
